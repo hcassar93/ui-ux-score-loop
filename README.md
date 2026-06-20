@@ -126,6 +126,8 @@ Score each view against:
 
 Every score should answer: does this help the user accomplish their real goal with confidence, speed, and dignity?
 
+The installed skill also includes `references/ui-ux-principles.md`, a compact summary of the scoring principles. The source book is intentionally not included in this repo.
+
 ## Dashboard
 
 The dashboard is the loop state. It must be dense enough to compare progress after several iterations, not a long report.

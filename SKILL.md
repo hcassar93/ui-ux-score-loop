@@ -38,6 +38,8 @@ Stop when the completion criterion is met, two passes stall, or the next best ch
 
 ## Scoring
 
+Before scoring or choosing an improvement target, read `references/ui-ux-principles.md` for compact principle guidance distilled from the user's preferred UI/UX playbook. Do not load or add the source book.
+
 Use the full 0-100 range:
 
 - 0-39: harmful or confusing.
