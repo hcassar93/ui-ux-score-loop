@@ -14,6 +14,7 @@ DEFAULT_VIEWPORTS = [
 DEFAULT_COLOR_MODES = ["light", "dark"]
 DEFAULT_BROWSER = "Prefer integrated browser; use external browser only if needed."
 DEFAULT_IMPROVEMENT_INTENSITY = "grouped"
+DEFAULT_VIEW_GRANULARITY = "standard"
 PRINCIPLES = [
     "Visual hierarchy",
     "Proximity",
@@ -96,6 +97,16 @@ def parse_improvement_intensity(value):
     return intensity
 
 
+def parse_view_granularity(value):
+    granularity = value.strip().lower()
+    allowed = {"essential", "standard", "exhaustive"}
+    if granularity not in allowed:
+        raise argparse.ArgumentTypeError(
+            "View granularity must be one of: essential, standard, exhaustive."
+        )
+    return granularity
+
+
 def parse_flow_id(value):
     flow_id = slug(value)
     if not flow_id:
@@ -132,13 +143,22 @@ def ensure_gitignore(root):
             file.write(f"{pattern}\n")
 
 
-def seed_state(flow, flow_id, viewports, modes, browser, improvement_intensity):
+def seed_state(
+    flow,
+    flow_id,
+    viewports,
+    modes,
+    browser,
+    improvement_intensity,
+    view_granularity,
+):
     return {
         "flow": flow,
         "flow_id": flow_id,
         "user_goal": "",
         "concerns": [],
         "improvement_intensity": improvement_intensity,
+        "view_granularity": view_granularity,
         "browser": {
             "preference": browser,
             "selected": "",
@@ -203,6 +223,7 @@ def seed_state(flow, flow_id, viewports, modes, browser, improvement_intensity):
 
 def normalize_state(state):
     state.setdefault("improvement_intensity", DEFAULT_IMPROVEMENT_INTENSITY)
+    state.setdefault("view_granularity", DEFAULT_VIEW_GRANULARITY)
     state.setdefault("flow_id", slug(state.get("flow") or "flow"))
 
     browser = state.get("browser")
@@ -771,6 +792,13 @@ def main():
         choices=("focused", "grouped", "broad"),
         help="How aggressively to improve each view per iteration.",
     )
+    parser.add_argument(
+        "--view-granularity",
+        default=None,
+        type=parse_view_granularity,
+        choices=("essential", "standard", "exhaustive"),
+        help="How aggressively to split the flow into views/states.",
+    )
     args = parser.parse_args()
 
     skill_root = Path(__file__).resolve().parents[1]
@@ -801,6 +829,8 @@ def main():
         state["flow_id"] = state.get("flow_id") or flow_id
         if args.improvement_intensity:
             state["improvement_intensity"] = args.improvement_intensity
+        if args.view_granularity:
+            state["view_granularity"] = args.view_granularity
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     else:
         state = seed_state(
@@ -810,6 +840,7 @@ def main():
             modes,
             args.browser,
             args.improvement_intensity or DEFAULT_IMPROVEMENT_INTENSITY,
+            args.view_granularity or DEFAULT_VIEW_GRANULARITY,
         )
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
