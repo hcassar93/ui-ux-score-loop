@@ -84,7 +84,7 @@ Use `assets/dashboard.html` as a template asset; do not paste it into chat unles
 
 Do not hand-edit `dashboard.html`. Update `data/state.json` and `data/ratings.md`, then rerun the script.
 
-The dashboard must be information dense, not a written report. Keep the top minimal: flow, compact status chips, breakpoint filter, and light/dark filter. The main view must be one comparison matrix with iterations as columns. Put changes, decision, and why in the first matrix rows. Then use views as row groups, with score, screenshot, notes, and rubric-rating rows for each view across iterations. Put page and flow averages at the bottom so progress is easy to scan after multiple iterations.
+The dashboard must be information dense, not a written report. Keep the top minimal: flow, compact status chips, breakpoint filter, and light/dark filter. The main view must be one comparison matrix with iterations as columns and an obvious hierarchy: flow context rows, page band rows, then indented view groups. Each page band should show that page's average for each iteration. Each view group should show score, screenshot, notes, and rubric-rating rows across iterations. End each breakpoint/mode block with a flow average row.
 
 ## Final Answer Contract
 

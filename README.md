@@ -152,10 +152,11 @@ Top: flow name, compact status chips, breakpoint filter, light/dark filter.
 
 Main matrix:
 - columns are iterations
-- first rows show changes, decision, and why
-- row groups are views
-- subrows show score, screenshot, notes, and rubric ratings
-- footer rows show page and flow averages
+- first rows show flow-level changes, decision, and why
+- page band rows show page averages
+- indented view groups sit under each page
+- view subrows show score, screenshot, notes, and rubric ratings
+- each breakpoint/mode block ends with a flow average
 ```
 
 The skill version includes a minimal Tailwind dashboard template and a helper. The agent must create or refresh the dashboard before scoring, edit `data/state.json`, keep short rationale in `data/ratings.md`, regenerate the dashboard, and give the dashboard path in its final answer:

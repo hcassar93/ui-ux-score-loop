@@ -245,14 +245,19 @@ def data_attrs(viewport, mode):
     return f' data-viewport-row="{esc(viewport)}" data-mode-row="{esc(mode)}"'
 
 
-def sticky_label(title, meta="", classes=""):
+def sticky_label(title, meta="", classes="", marker=""):
     title_class = "text-white" if "text-white" in classes else "text-neutral-950"
     meta_class = "text-neutral-300" if "text-white" in classes else "text-neutral-500"
     bg_class = "" if "bg-" in classes else "bg-white"
+    marker_html = (
+        f'<span class="mr-2 inline-block h-2.5 w-2.5 rounded-sm {marker}"></span>'
+        if marker
+        else ""
+    )
     return (
         f'<th class="sticky left-0 z-10 border-b border-r border-neutral-200 {bg_class} '
         f'px-3 py-2 text-left align-top {classes}">'
-        f'<div class="font-semibold {title_class}">{esc(title)}</div>'
+        f'<div class="font-semibold {title_class}">{marker_html}{esc(title)}</div>'
         f'<div class="mt-0.5 text-[11px] font-normal {meta_class}">{esc(meta)}</div>'
         f"</th>"
     )
@@ -271,6 +276,23 @@ def screenshot_cell(item):
         f'<span class="mt-1 block max-w-56 truncate text-[10px] text-neutral-400">{safe_path}</span>'
         f"</a>"
     )
+
+
+def iteration_value_cells(iteration_numbers, value_for_number, classes):
+    return [
+        td(value_for_number(number), classes)
+        for number in iteration_numbers
+    ]
+
+
+def average_cells(iteration_numbers, values_for_number, classes):
+    return [
+        raw_td(
+            score_pill(average(values_for_number(number))),
+            classes,
+        )
+        for number in iteration_numbers
+    ]
 
 
 def render(template, state):
@@ -371,163 +393,196 @@ def render(template, state):
         matrix_rows.append(
             row(
                 [
-                    sticky_label(label, "Iteration context", "bg-neutral-50"),
-                    *[
-                        td(
-                            (iteration_by_number.get(number) or {}).get(key),
-                            "border-b border-r border-neutral-200 px-3 py-2 align-top text-neutral-700",
-                        )
-                        for number in iteration_numbers
-                    ],
+                    sticky_label(
+                        label,
+                        "Flow / iteration context",
+                        "bg-neutral-50",
+                        "bg-neutral-400",
+                    ),
+                    *iteration_value_cells(
+                        iteration_numbers,
+                        lambda number, key=key: (iteration_by_number.get(number) or {}).get(key),
+                        "border-b border-r border-neutral-200 bg-neutral-50 px-3 py-2 align-top text-neutral-700",
+                    ),
                 ]
             )
         )
 
-    for key in sorted(grouped_views):
-        page, view_number, view_name, viewport, mode = key
-        attrs = data_attrs(viewport, mode)
-        by_iteration = grouped_views[key]
-        meta = f"{page} / {viewport} / {mode}"
-        matrix_rows.append(
-            row(
-                [
-                    sticky_label(f"{view_number} {view_name}", meta, "bg-neutral-50"),
-                    *[
-                        raw_td(
-                            (
-                                f'{score_pill(numeric((by_iteration.get(number) or {}).get("score")))}'
-                                f'<span class="ml-2 text-[11px] text-neutral-500">'
-                                f'{esc(delta_text((by_iteration.get(number) or {}).get("delta")))}</span>'
-                                f'<div class="mt-1 text-[11px] text-neutral-500">'
-                                f'{esc((by_iteration.get(number) or {}).get("lowest_principle"))}</div>'
-                            ),
-                            "border-b border-r border-neutral-200 px-3 py-2 align-top",
-                        )
-                        for number in iteration_numbers
-                    ],
-                ],
-                attrs,
-            )
+    visible_combinations = [
+        (viewport["name"], mode)
+        for viewport in viewports
+        for mode in modes
+        if any(
+            item.get("viewport") == viewport["name"] and item.get("mode") == mode
+            for item in views
         )
-        matrix_rows.append(
-            row(
-                [
-                    sticky_label("Screenshot", meta),
-                    *[
-                        raw_td(
-                            screenshot_cell(by_iteration.get(number)),
-                            "border-b border-r border-neutral-200 px-3 py-2 align-top",
-                        )
-                        for number in iteration_numbers
-                    ],
-                ],
-                attrs,
-            )
-        )
-        matrix_rows.append(
-            row(
-                [
-                    sticky_label("Notes", meta),
-                    *[
-                        td(
-                            (by_iteration.get(number) or {}).get("note"),
-                            "border-b border-r border-neutral-200 px-3 py-2 align-top text-neutral-700",
-                        )
-                        for number in iteration_numbers
-                    ],
-                ],
-                attrs,
-            )
-        )
+    ]
 
-        principle_map = grouped_rubric.get(key, {})
-        ordered_principles = [
-            principle for principle in PRINCIPLES if principle in principle_map
-        ] + sorted(
-            principle for principle in principle_map if principle not in PRINCIPLES
+    for viewport, mode in visible_combinations:
+        pages = sorted(
+            {
+                key[0]
+                for key in grouped_views
+                if key[3] == viewport and key[4] == mode
+            }
         )
-        for principle in ordered_principles:
-            scores_by_iteration = principle_map[principle]
+        for page in pages:
+            page_keys = [
+                key
+                for key in sorted(grouped_views)
+                if key[0] == page and key[3] == viewport and key[4] == mode
+            ]
+            page_items = [
+                item
+                for key in page_keys
+                for item in grouped_views[key].values()
+            ]
+            attrs = data_attrs(viewport, mode)
             matrix_rows.append(
                 row(
                     [
-                        sticky_label(principle, "Rubric", "font-normal"),
-                        *[
-                            raw_td(
-                                (
-                                    f'{score_pill(numeric((scores_by_iteration.get(number) or {}).get("score")))}'
-                                    f'<span class="ml-2 text-[11px] text-neutral-500">'
-                                    f'{esc(delta_text((scores_by_iteration.get(number) or {}).get("delta")))}</span>'
-                                    f'<div class="mt-1 text-[11px] text-neutral-500">'
-                                    f'{esc((scores_by_iteration.get(number) or {}).get("note"))}</div>'
-                                ),
-                                "border-b border-r border-neutral-200 px-3 py-1.5 align-top",
-                            )
-                            for number in iteration_numbers
-                        ],
+                        sticky_label(
+                            f"Page: {page}",
+                            f"Flow > {page} / {viewport} / {mode}",
+                            "bg-neutral-900 text-white",
+                            "bg-white",
+                        ),
+                        *average_cells(
+                            iteration_numbers,
+                            lambda number, page_items=page_items: (
+                                numeric(item.get("score"))
+                                for item in page_items
+                                if item.get("iteration", 0) == number
+                            ),
+                            "border-b border-r border-neutral-700 bg-neutral-900 px-3 py-2 align-top",
+                        ),
                     ],
                     attrs,
                 )
             )
 
-    matrix_rows = "\n".join(matrix_rows)
+            for key in page_keys:
+                page, view_number, view_name, viewport, mode = key
+                attrs = data_attrs(viewport, mode)
+                by_iteration = grouped_views[key]
+                meta = f"Flow > {page} > {view_name} / {viewport} / {mode}"
+                principle_map = grouped_rubric.get(key, {})
+                ordered_principles = [
+                    principle for principle in PRINCIPLES if principle in principle_map
+                ] + sorted(
+                    principle for principle in principle_map if principle not in PRINCIPLES
+                )
 
-    average_rows = []
-    for viewport in [item["name"] for item in viewports]:
-        for mode in modes:
-            matching = [
-                item
-                for item in views
-                if item.get("viewport") == viewport and item.get("mode") == mode
-            ]
-            if not matching:
-                continue
-            for page in sorted({item.get("page") or "Page" for item in matching}):
-                page_items = [item for item in matching if (item.get("page") or "Page") == page]
-                average_rows.append(
+                matrix_rows.append(
                     row(
                         [
-                            sticky_label(f"Page avg: {page}", f"{viewport} / {mode}", "bg-neutral-950 text-white"),
+                            sticky_label(
+                                f"{view_number} {view_name}",
+                                meta,
+                                "bg-white pl-6",
+                                "bg-neutral-300",
+                            ),
                             *[
                                 raw_td(
-                                    score_pill(
-                                        average(
-                                            numeric(item.get("score"))
-                                            for item in page_items
-                                            if item.get("iteration", 0) == number
-                                        )
+                                    (
+                                        f'{score_pill(numeric((by_iteration.get(number) or {}).get("score")))}'
+                                        f'<span class="ml-2 text-[11px] text-neutral-500">'
+                                        f'{esc(delta_text((by_iteration.get(number) or {}).get("delta")))}</span>'
+                                        f'<div class="mt-1 text-[11px] text-neutral-500">'
+                                        f'{esc((by_iteration.get(number) or {}).get("lowest_principle"))}</div>'
                                     ),
-                                    "border-b border-r border-neutral-700 px-3 py-2 align-top",
+                                    "border-b border-r border-neutral-200 px-3 py-2 align-top",
                                 )
                                 for number in iteration_numbers
                             ],
                         ],
-                        data_attrs(viewport, mode),
+                        attrs,
                     )
                 )
-            average_rows.append(
-                row(
-                    [
-                        sticky_label("Flow avg", f"{viewport} / {mode}", "bg-neutral-950 text-white"),
-                        *[
-                            raw_td(
-                                score_pill(
-                                    average(
-                                        numeric(item.get("score"))
-                                        for item in matching
-                                        if item.get("iteration", 0) == number
-                                    )
-                                ),
-                                "border-b border-r border-neutral-700 px-3 py-2 align-top",
-                            )
-                            for number in iteration_numbers
+                matrix_rows.append(
+                    row(
+                        [
+                            sticky_label("Screenshot", "View evidence", "pl-10"),
+                            *[
+                                raw_td(
+                                    screenshot_cell(by_iteration.get(number)),
+                                    "border-b border-r border-neutral-200 px-3 py-2 align-top",
+                                )
+                                for number in iteration_numbers
+                            ],
                         ],
-                    ],
-                    data_attrs(viewport, mode),
+                        attrs,
+                    )
                 )
-            )
+                matrix_rows.append(
+                    row(
+                        [
+                            sticky_label("Notes", "View rationale", "pl-10"),
+                            *[
+                                td(
+                                    (by_iteration.get(number) or {}).get("note"),
+                                    "border-b border-r border-neutral-200 px-3 py-2 align-top text-neutral-700",
+                                )
+                                for number in iteration_numbers
+                            ],
+                        ],
+                        attrs,
+                    )
+                )
 
-    average_rows = "\n".join(average_rows)
+                for principle in ordered_principles:
+                    scores_by_iteration = principle_map[principle]
+                    matrix_rows.append(
+                        row(
+                            [
+                                sticky_label(principle, "Rubric", "pl-14 font-normal"),
+                                *[
+                                    raw_td(
+                                        (
+                                            f'{score_pill(numeric((scores_by_iteration.get(number) or {}).get("score")))}'
+                                            f'<span class="ml-2 text-[11px] text-neutral-500">'
+                                            f'{esc(delta_text((scores_by_iteration.get(number) or {}).get("delta")))}</span>'
+                                            f'<div class="mt-1 text-[11px] text-neutral-500">'
+                                            f'{esc((scores_by_iteration.get(number) or {}).get("note"))}</div>'
+                                        ),
+                                        "border-b border-r border-neutral-200 px-3 py-1.5 align-top",
+                                    )
+                                    for number in iteration_numbers
+                                ],
+                            ],
+                            attrs,
+                        )
+                    )
+
+        combo_items = [
+            item
+            for item in views
+            if item.get("viewport") == viewport and item.get("mode") == mode
+        ]
+        matrix_rows.append(
+            row(
+                [
+                    sticky_label(
+                        "Flow avg",
+                        f"Flow / {viewport} / {mode}",
+                        "bg-black text-white",
+                        "bg-white",
+                    ),
+                    *average_cells(
+                        iteration_numbers,
+                        lambda number, combo_items=combo_items: (
+                            numeric(item.get("score"))
+                            for item in combo_items
+                            if item.get("iteration", 0) == number
+                        ),
+                        "border-b border-r border-neutral-700 bg-black px-3 py-2 align-top",
+                    ),
+                ],
+                data_attrs(viewport, mode),
+            )
+        )
+
+    matrix_rows = "\n".join(matrix_rows)
 
     replacements = {
         "{{FLOW_NAME}}": esc(state.get("flow")),
@@ -547,7 +602,6 @@ def render(template, state):
         "{{SUMMARY_CHIPS}}": summary_chips,
         "{{MATRIX_HEADER}}": matrix_header,
         "{{MATRIX_ROWS}}": matrix_rows,
-        "{{AVERAGE_ROWS}}": average_rows,
         "{{STATUS}}": esc(state.get("status")),
         "{{NEXT_WHY}}": esc(next_improvement.get("why")),
         "{{EXPECTED_DELTA}}": esc(next_improvement.get("expected_delta")),
