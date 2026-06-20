@@ -33,6 +33,14 @@
                 {{MODE_OPTIONS}}
               </select>
             </div>
+            <div class="flex items-end gap-1.5">
+              <button class="h-9 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-700" type="button" data-expand-all>
+                Expand all
+              </button>
+              <button class="h-9 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-700" type="button" data-collapse-all>
+                Collapse all
+              </button>
+            </div>
           </nav>
         </div>
       </header>
@@ -59,6 +67,12 @@
       const viewportSelect = document.querySelector("[data-viewport-select]");
       const modeSelect = document.querySelector("[data-mode-select]");
       const rows = document.querySelectorAll("[data-viewport-row]");
+      const pageToggles = document.querySelectorAll("[data-toggle-page]");
+      const viewToggles = document.querySelectorAll("[data-toggle-view]");
+      const expandAllButton = document.querySelector("[data-expand-all]");
+      const collapseAllButton = document.querySelector("[data-collapse-all]");
+      const collapsedPages = new Set();
+      const collapsedViews = new Set();
       let selectedViewport = "all";
       let selectedMode = "all";
 
@@ -68,7 +82,23 @@
             selectedViewport === "all" || row.dataset.viewportRow === selectedViewport;
           const modeMatch =
             selectedMode === "all" || row.dataset.modeRow === selectedMode;
-          row.hidden = !(viewportMatch && modeMatch);
+          const pageCollapsed = row.dataset.pageId && collapsedPages.has(row.dataset.pageId);
+          const viewCollapsed = row.dataset.viewId && collapsedViews.has(row.dataset.viewId);
+          const hiddenByCollapse =
+            (pageCollapsed && row.dataset.rowKind !== "page") ||
+            (viewCollapsed && row.dataset.rowKind === "detail");
+          row.hidden = !(viewportMatch && modeMatch) || hiddenByCollapse;
+        });
+
+        pageToggles.forEach((button) => {
+          const collapsed = collapsedPages.has(button.dataset.togglePage);
+          button.setAttribute("aria-expanded", String(!collapsed));
+          button.textContent = collapsed ? "+" : "-";
+        });
+        viewToggles.forEach((button) => {
+          const collapsed = collapsedViews.has(button.dataset.toggleView);
+          button.setAttribute("aria-expanded", String(!collapsed));
+          button.textContent = collapsed ? "+" : "-";
         });
       }
 
@@ -80,6 +110,34 @@
       modeSelect.addEventListener("change", () => {
           selectedMode = modeSelect.value;
           applyFilters();
+      });
+
+      pageToggles.forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.dataset.togglePage;
+          collapsedPages.has(id) ? collapsedPages.delete(id) : collapsedPages.add(id);
+          applyFilters();
+        });
+      });
+
+      viewToggles.forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.dataset.toggleView;
+          collapsedViews.has(id) ? collapsedViews.delete(id) : collapsedViews.add(id);
+          applyFilters();
+        });
+      });
+
+      expandAllButton.addEventListener("click", () => {
+        collapsedPages.clear();
+        collapsedViews.clear();
+        applyFilters();
+      });
+
+      collapseAllButton.addEventListener("click", () => {
+        pageToggles.forEach((button) => collapsedPages.add(button.dataset.togglePage));
+        viewToggles.forEach((button) => collapsedViews.add(button.dataset.toggleView));
+        applyFilters();
       });
     </script>
   </body>

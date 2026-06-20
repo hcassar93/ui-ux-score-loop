@@ -153,7 +153,7 @@ Keep it simple:
 ```markdown
 # UI/UX Score Loop Dashboard
 
-Top: flow name plus two dropdowns only: breakpoint and light/dark mode.
+Top: flow name, breakpoint dropdown, light/dark mode dropdown, and small Expand all / Collapse all controls.
 
 Main matrix:
 - columns are iterations
@@ -162,6 +162,7 @@ Main matrix:
 - indented view groups sit under each page
 - view subrows show score, screenshot, notes, and rubric ratings
 - each breakpoint/mode block ends with a flow average
+- page and view groups can expand/collapse
 ```
 
 The skill version includes a minimal Tailwind dashboard template and a helper. The agent must create or refresh the dashboard before scoring, edit `data/state.json`, keep short rationale in `data/ratings.md`, regenerate the dashboard, and give the dashboard path in its final answer:

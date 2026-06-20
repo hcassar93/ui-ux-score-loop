@@ -2,6 +2,7 @@
 import argparse
 import html
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -279,6 +280,30 @@ def data_attrs(viewport, mode):
     return f' data-viewport-row="{esc(viewport)}" data-mode-row="{esc(mode)}"'
 
 
+def slug(value):
+    value = str(value or "").lower()
+    value = re.sub(r"[^a-z0-9]+", "-", value).strip("-")
+    return value or "item"
+
+
+def page_id(viewport, mode, page):
+    return slug(f"{viewport}-{mode}-{page}")
+
+
+def view_id(viewport, mode, page, view_number, view_name):
+    return slug(f"{viewport}-{mode}-{page}-{view_number}-{view_name}")
+
+
+def row_attrs(viewport, mode, kind, page=None, view=None):
+    attrs = data_attrs(viewport, mode)
+    attrs += f' data-row-kind="{esc(kind)}"'
+    if page:
+        attrs += f' data-page-id="{esc(page)}"'
+    if view:
+        attrs += f' data-view-id="{esc(view)}"'
+    return attrs
+
+
 def sticky_label(title, meta="", classes="", marker=""):
     title_class = "text-white" if "text-white" in classes else "text-neutral-950"
     meta_class = "text-neutral-300" if "text-white" in classes else "text-neutral-500"
@@ -294,6 +319,29 @@ def sticky_label(title, meta="", classes="", marker=""):
         f'<div class="font-semibold {title_class}">{marker_html}{esc(title)}</div>'
         f'<div class="mt-0.5 text-[11px] font-normal {meta_class}">{esc(meta)}</div>'
         f"</th>"
+    )
+
+
+def disclosure_label(title, meta, target_type, target_id, classes="", marker=""):
+    title_class = "text-white" if "text-white" in classes else "text-neutral-950"
+    meta_class = "text-neutral-300" if "text-white" in classes else "text-neutral-500"
+    bg_class = "" if "bg-" in classes else "bg-white"
+    marker_html = (
+        f'<span class="mr-2 inline-block h-2.5 w-2.5 rounded-sm {marker}"></span>'
+        if marker
+        else ""
+    )
+    target_attr = "data-toggle-page" if target_type == "page" else "data-toggle-view"
+    return (
+        f'<th class="sticky left-0 z-10 border-b border-r border-neutral-200 {bg_class} '
+        f'px-3 py-2 text-left align-top {classes}">'
+        f'<div class="flex items-start gap-2">'
+        f'<button type="button" class="mt-0.5 inline-flex h-4 w-4 items-center justify-center '
+        f'rounded border border-current text-[10px] leading-none" aria-expanded="true" '
+        f'{target_attr}="{esc(target_id)}">-</button>'
+        f'<div><div class="font-semibold {title_class}">{marker_html}{esc(title)}</div>'
+        f'<div class="mt-0.5 text-[11px] font-normal {meta_class}">{esc(meta)}</div></div>'
+        f"</div></th>"
     )
 
 
@@ -431,6 +479,7 @@ def render(template, state):
             }
         )
         for page in pages:
+            current_page_id = page_id(viewport, mode, page)
             page_keys = [
                 key
                 for key in sorted(grouped_views)
@@ -441,13 +490,14 @@ def render(template, state):
                 for key in page_keys
                 for item in grouped_views[key].values()
             ]
-            attrs = data_attrs(viewport, mode)
             matrix_rows.append(
                 row(
                     [
-                        sticky_label(
+                        disclosure_label(
                             f"Page: {page}",
                             f"Flow > {page} / {viewport} / {mode}",
+                            "page",
+                            current_page_id,
                             "bg-neutral-900 text-white",
                             "bg-white",
                         ),
@@ -461,13 +511,14 @@ def render(template, state):
                             "border-b border-r border-neutral-700 bg-neutral-900 px-3 py-2 align-top",
                         ),
                     ],
-                    attrs,
+                    row_attrs(viewport, mode, "page", page=current_page_id),
                 )
             )
 
             for key in page_keys:
                 page, view_number, view_name, viewport, mode = key
-                attrs = data_attrs(viewport, mode)
+                current_page_id = page_id(viewport, mode, page)
+                current_view_id = view_id(viewport, mode, page, view_number, view_name)
                 by_iteration = grouped_views[key]
                 meta = f"Flow > {page} > {view_name} / {viewport} / {mode}"
                 principle_map = grouped_rubric.get(key, {})
@@ -480,9 +531,11 @@ def render(template, state):
                 matrix_rows.append(
                     row(
                         [
-                            sticky_label(
+                            disclosure_label(
                                 f"{view_number} {view_name}",
                                 meta,
+                                "view",
+                                current_view_id,
                                 "bg-white pl-6",
                                 "bg-neutral-300",
                             ),
@@ -500,7 +553,13 @@ def render(template, state):
                                 for number in iteration_numbers
                             ],
                         ],
-                        attrs,
+                        row_attrs(
+                            viewport,
+                            mode,
+                            "view",
+                            page=current_page_id,
+                            view=current_view_id,
+                        ),
                     )
                 )
                 matrix_rows.append(
@@ -515,7 +574,13 @@ def render(template, state):
                                 for number in iteration_numbers
                             ],
                         ],
-                        attrs,
+                        row_attrs(
+                            viewport,
+                            mode,
+                            "detail",
+                            page=current_page_id,
+                            view=current_view_id,
+                        ),
                     )
                 )
                 matrix_rows.append(
@@ -530,7 +595,13 @@ def render(template, state):
                                 for number in iteration_numbers
                             ],
                         ],
-                        attrs,
+                        row_attrs(
+                            viewport,
+                            mode,
+                            "detail",
+                            page=current_page_id,
+                            view=current_view_id,
+                        ),
                     )
                 )
 
@@ -554,7 +625,13 @@ def render(template, state):
                                     for number in iteration_numbers
                                 ],
                             ],
-                            attrs,
+                            row_attrs(
+                                viewport,
+                                mode,
+                                "detail",
+                                page=current_page_id,
+                                view=current_view_id,
+                            ),
                         )
                     )
 
@@ -582,7 +659,7 @@ def render(template, state):
                         "border-b border-r border-neutral-700 bg-black px-3 py-2 align-top",
                     ),
                 ],
-                data_attrs(viewport, mode),
+                row_attrs(viewport, mode, "flow"),
             )
         )
 
