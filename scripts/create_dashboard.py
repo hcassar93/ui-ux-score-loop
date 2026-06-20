@@ -357,21 +357,30 @@ def disclosure_label(title, meta, target_type, target_id, classes="", marker="")
     )
 
 
-def screenshot_cell(item):
+def screenshot_cell(item, compact=False):
     path = item.get("screenshot") if item else None
     if not path:
         return '<span class="text-neutral-400">--</span>'
     safe_path = esc(path)
+    frame_size = "h-28 w-44" if compact else "h-36 w-56"
+    path_class = "sr-only" if compact else "mt-1 block max-w-56 truncate text-[10px] text-neutral-400"
+    onerror = (
+        "this.style.display='none';"
+        "const label=this.parentElement.nextElementSibling;"
+        "label.textContent='Missing screenshot';"
+        "label.classList.remove('sr-only','hidden');"
+        "label.classList.add('mt-1','block','text-[10px]','text-neutral-400');"
+    )
     return (
         f'<button type="button" class="block text-left" data-screenshot-src="{safe_path}" '
         f'aria-label="Open screenshot {safe_path}">'
-        f'<span class="screenshot-frame flex h-36 w-56 items-center justify-center rounded-md '
+        f'<span class="screenshot-frame flex {frame_size} items-center justify-center rounded-md '
         f'border border-neutral-400 p-2 shadow-inner">'
         f'<img src="{safe_path}" alt="{safe_path}" '
-        f'onerror="this.style.display=\'none\';this.parentElement.nextElementSibling.textContent=\'Missing screenshot\';" '
+        f'onerror="{esc(onerror)}" '
         f'class="max-h-full max-w-full rounded-sm bg-white object-contain shadow-sm ring-2 ring-neutral-500/40" />'
         f"</span>"
-        f'<span class="mt-1 block max-w-56 truncate text-[10px] text-neutral-400">{safe_path}</span>'
+        f'<span class="{path_class}">{safe_path}</span>'
         f"</button>"
     )
 
@@ -569,19 +578,24 @@ def render(template, state):
                                 meta,
                                 "view",
                                 current_view_id,
-                                "bg-white pl-6",
-                                "bg-neutral-300",
+                                "bg-neutral-900 pl-6 text-white",
+                                "bg-white",
                             ),
                             *[
                                 raw_td(
                                     (
+                                        f'<div class="flex flex-col gap-2">'
+                                        f'<div>'
                                         f'{score_pill(numeric((by_iteration.get(number) or {}).get("score")))}'
-                                        f'<span class="ml-2 text-[11px] text-neutral-500">'
+                                        f'<span class="ml-2 text-[11px] text-neutral-400">'
                                         f'{esc(delta_text((by_iteration.get(number) or {}).get("delta")))}</span>'
-                                        f'<div class="mt-1 text-[11px] text-neutral-500">'
+                                        f'<div class="mt-1 text-[11px] text-neutral-300">'
                                         f'{esc((by_iteration.get(number) or {}).get("lowest_principle"))}</div>'
+                                        f'</div>'
+                                        f'{screenshot_cell(by_iteration.get(number), compact=True)}'
+                                        f'</div>'
                                     ),
-                                    "border-b border-r border-neutral-200 px-3 py-2 align-top",
+                                    "border-b border-r border-neutral-700 bg-neutral-900 px-3 py-2 align-top",
                                 )
                                 for number in iteration_numbers
                             ],
@@ -590,27 +604,6 @@ def render(template, state):
                             viewport,
                             mode,
                             "view",
-                            page=current_page_id,
-                            view=current_view_id,
-                        ),
-                    )
-                )
-                matrix_rows.append(
-                    row(
-                        [
-                            sticky_label("Screenshot", "View evidence", "pl-10"),
-                            *[
-                                raw_td(
-                                    screenshot_cell(by_iteration.get(number)),
-                                    "border-b border-r border-neutral-200 px-3 py-2 align-top",
-                                )
-                                for number in iteration_numbers
-                            ],
-                        ],
-                        row_attrs(
-                            viewport,
-                            mode,
-                            "detail",
                             page=current_page_id,
                             view=current_view_id,
                         ),

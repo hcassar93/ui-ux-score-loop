@@ -166,7 +166,8 @@ Main matrix:
 - collapsible flow context rows show changes, decision, and why
 - page band rows show page averages
 - indented view groups sit under each page
-- view subrows show score, screenshot, notes, and rubric ratings
+- view header rows show score, delta, weakest principle, and screenshot
+- view detail rows show notes and rubric ratings
 - each breakpoint/mode block ends with a flow average
 - flow context, page, and view groups can expand/collapse
 - screenshot thumbnails open in a modal
