@@ -59,6 +59,12 @@ Start at the URL you provide. If you provide `/`, the loop begins at `/` and tre
 
 Browser is optional. If omitted, prefer an integrated browser such as Codex in-app/browser panel or the IDE integrated browser. Use Playwright MCP, Chrome, or another external browser when that better preserves auth/session state, viewport control, screenshots, or access to the target.
 
+Interactive mode is optional. The default is `auto`.
+
+- `auto`: ask a concise preflight only when the request is underspecified.
+- `interactive`: always ask about settings and boundaries before starting.
+- `direct`: proceed with defaults and ask only for hard blockers.
+
 View granularity is optional and controls how aggressively the flow is split into views/states. The default is `standard`.
 
 - `essential`: durable screens and critical states only.
@@ -76,6 +82,8 @@ Improvement intensity is optional and applies per view in each iteration. The de
 Copy this into any agent:
 
 ```text
+Interactive mode defaults to auto. In auto mode, ask a concise preflight when the request is thin or ambiguous about flows, boundaries, environment, completion, concerns, off-limits areas, browser, viewports, modes, view granularity, or improvement intensity. Proceed directly only when the user has meaningfully specified enough to run safely. If interactive is specified, always ask before starting. If direct is specified, proceed with defaults for unspecified noncritical settings and ask only for hard blockers.
+
 Evaluate one specified key flow, or several related flows, in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. A flow name is a user goal, not a route: "login flow" does not mean start at `/login`. If the user supplies a URL, start at that exact URL. If the user asks you to start or find an environment but gives no URL, identify the app origin and start at its root `/`. Do not open a deeper route such as `/login`, `/signup`, or `/reset-password` unless the user explicitly supplied that route or the root redirects there. Create one dashboard/state/screenshots folder per flow under `.ui-ux-score-loop/flows/{flow-id}/`. When multiple related flows are requested, compare shared components, copy, spacing, validation, loading, recovery, and visual states before changing shared UI so consistency improves across flows. View granularity defaults to `standard` unless specified: `essential` captures only durable screens and critical states, `standard` captures normal screens plus meaningful modals/popovers/loading/error/success/recovery states, and `exhaustive` captures all user-meaningful states including hover/focus/pressed/disabled, multi-state popovers, representative error variants, slow loading phases, and important microinteractions. Explore each flow as a real user would, splitting pages, views, and states according to the granularity setting. Act as a human proxy, not an agent: prefer visible navigation over guessed routes, assume imperfect memory and possible mistakes, value clear progress while waiting, and judge only what the UI explains without console logs or technical knowledge. For auth flows, include visible password reset/recovery unless excluded. If a browser/tool is specified, use it unless it cannot faithfully run the flow; otherwise prefer an integrated browser, falling back to Playwright MCP or another external browser when needed. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. Discover theme support at the app level, not only on the entry page: check root/home, app shell after login when credentials exist, settings/profile/header controls, persisted theme keys, html classes/data attributes, CSS/framework dark-mode support, and browser color-scheme emulation. If light and dark can be activated reliably, always test both even when no toggle is visible on the login page; record how each mode was set. If no support is discoverable, use `default` mode. Improvement intensity defaults to `grouped` unless specified: `focused` changes one highest-leverage issue per view, `grouped` changes a few logically related issues per view, and `broad` changes all safe identified issues per view. Apply intensity per view, not once for the whole iteration; in each iteration, improve every view that has a safe useful improvement, while leaving views alone when nothing should change. Create dashboards before scoring. Screenshot and score every view/breakpoint/mode 0-100 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep dashboards updated with screenshots, averages, deltas, notes, and the next target. Improve the lowest user-impactful safe scores according to the intensity setting with brand-consistent changes, rerun from the same entry point, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without giving every dashboard path and browser used. Do not overhaul the UI; serve the user.
 ```
 
@@ -85,6 +93,7 @@ Use it like this:
 Run UI/UX Score Loop on [FLOW or FLOWS] at [URL or app environment].
 
 Completion: choose one: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations.
+Interactive mode: optional. Defaults to auto. Options: auto, interactive, direct.
 Viewports: optional. Defaults to phone 390x844, tablet 768x1024, and laptop 1440x900.
 Modes: optional. If light/dark support can be discovered anywhere in the app, collect both automatically; otherwise use default.
 Browser: optional. Prefer integrated browser by default; examples: Codex in-app browser, VS Code integrated browser, Playwright MCP, Chrome with logged-in session.
@@ -114,6 +123,7 @@ Example:
 Run UI/UX Score Loop on signup at http://localhost:3000.
 Concerns: mobile clarity, form errors, trust, and reducing hesitation before submit.
 Completion: reach a flow score of 85/100.
+Interactive mode: auto.
 Viewports: phone 390x844, tablet 768x1024, laptop 1440x900.
 Modes: light and dark.
 Browser: Codex in-app browser.
@@ -237,7 +247,7 @@ The helper adds `.ui-ux-score-loop/` to the target repository's `.gitignore` bef
 Custom dashboard viewports:
 
 ```bash
-python3 scripts/create_dashboard.py --flow "Signup" --viewport phone:390x844 --viewport desktop:1728x1117 --mode light --mode dark --browser "Codex in-app browser" --view-granularity standard --improvement-intensity grouped
+python3 scripts/create_dashboard.py --flow "Signup" --viewport phone:390x844 --viewport desktop:1728x1117 --mode light --mode dark --browser "Codex in-app browser" --interactive-mode auto --view-granularity standard --improvement-intensity grouped
 ```
 
 ## Maintainer Submission
@@ -251,6 +261,8 @@ The UI/UX score loop
 Prompt:
 
 ```text
+Interactive mode defaults to auto. In auto mode, ask a concise preflight when the request is thin or ambiguous about flows, boundaries, environment, completion, concerns, off-limits areas, browser, viewports, modes, view granularity, or improvement intensity. Proceed directly only when the user has meaningfully specified enough to run safely. If interactive is specified, always ask before starting. If direct is specified, proceed with defaults for unspecified noncritical settings and ask only for hard blockers.
+
 Evaluate one specified key flow, or several related flows, in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. A flow name is a user goal, not a route: "login flow" does not mean start at `/login`. If the user supplies a URL, start at that exact URL. If the user asks you to start or find an environment but gives no URL, identify the app origin and start at its root `/`. Do not open a deeper route such as `/login`, `/signup`, or `/reset-password` unless the user explicitly supplied that route or the root redirects there. Create one dashboard/state/screenshots folder per flow under `.ui-ux-score-loop/flows/{flow-id}/`. When multiple related flows are requested, compare shared components, copy, spacing, validation, loading, recovery, and visual states before changing shared UI so consistency improves across flows. View granularity defaults to `standard` unless specified: `essential` captures only durable screens and critical states, `standard` captures normal screens plus meaningful modals/popovers/loading/error/success/recovery states, and `exhaustive` captures all user-meaningful states including hover/focus/pressed/disabled, multi-state popovers, representative error variants, slow loading phases, and important microinteractions. Explore each flow as a real user would, splitting pages, views, and states according to the granularity setting. Act as a human proxy, not an agent: prefer visible navigation over guessed routes, assume imperfect memory and possible mistakes, value clear progress while waiting, and judge only what the UI explains without console logs or technical knowledge. For auth flows, include visible password reset/recovery unless excluded. If a browser/tool is specified, use it unless it cannot faithfully run the flow; otherwise prefer an integrated browser, falling back to Playwright MCP or another external browser when needed. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. Discover theme support at the app level, not only on the entry page: check root/home, app shell after login when credentials exist, settings/profile/header controls, persisted theme keys, html classes/data attributes, CSS/framework dark-mode support, and browser color-scheme emulation. If light and dark can be activated reliably, always test both even when no toggle is visible on the login page; record how each mode was set. If no support is discoverable, use `default` mode. Improvement intensity defaults to `grouped` unless specified: `focused` changes one highest-leverage issue per view, `grouped` changes a few logically related issues per view, and `broad` changes all safe identified issues per view. Apply intensity per view, not once for the whole iteration; in each iteration, improve every view that has a safe useful improvement, while leaving views alone when nothing should change. Create dashboards before scoring. Screenshot and score every view/breakpoint/mode 0-100 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep dashboards updated with screenshots, averages, deltas, notes, and the next target. Improve the lowest user-impactful safe scores according to the intensity setting with brand-consistent changes, rerun from the same entry point, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without giving every dashboard path and browser used. Do not overhaul the UI; serve the user.
 ```
 

@@ -15,6 +15,7 @@ DEFAULT_COLOR_MODES = ["light", "dark"]
 DEFAULT_BROWSER = "Prefer integrated browser; use external browser only if needed."
 DEFAULT_IMPROVEMENT_INTENSITY = "grouped"
 DEFAULT_VIEW_GRANULARITY = "standard"
+DEFAULT_INTERACTIVE_MODE = "auto"
 PRINCIPLES = [
     "Visual hierarchy",
     "Proximity",
@@ -107,6 +108,16 @@ def parse_view_granularity(value):
     return granularity
 
 
+def parse_interactive_mode(value):
+    mode = value.strip().lower()
+    allowed = {"auto", "interactive", "direct"}
+    if mode not in allowed:
+        raise argparse.ArgumentTypeError(
+            "Interactive mode must be one of: auto, interactive, direct."
+        )
+    return mode
+
+
 def parse_flow_id(value):
     flow_id = slug(value)
     if not flow_id:
@@ -151,6 +162,7 @@ def seed_state(
     browser,
     improvement_intensity,
     view_granularity,
+    interactive_mode,
 ):
     return {
         "flow": flow,
@@ -159,6 +171,7 @@ def seed_state(
         "concerns": [],
         "improvement_intensity": improvement_intensity,
         "view_granularity": view_granularity,
+        "interactive_mode": interactive_mode,
         "browser": {
             "preference": browser,
             "selected": "",
@@ -224,6 +237,7 @@ def seed_state(
 def normalize_state(state):
     state.setdefault("improvement_intensity", DEFAULT_IMPROVEMENT_INTENSITY)
     state.setdefault("view_granularity", DEFAULT_VIEW_GRANULARITY)
+    state.setdefault("interactive_mode", DEFAULT_INTERACTIVE_MODE)
     state.setdefault("flow_id", slug(state.get("flow") or "flow"))
 
     browser = state.get("browser")
@@ -799,6 +813,13 @@ def main():
         choices=("essential", "standard", "exhaustive"),
         help="How aggressively to split the flow into views/states.",
     )
+    parser.add_argument(
+        "--interactive-mode",
+        default=None,
+        type=parse_interactive_mode,
+        choices=("auto", "interactive", "direct"),
+        help="How to handle preflight configuration questions.",
+    )
     args = parser.parse_args()
 
     skill_root = Path(__file__).resolve().parents[1]
@@ -831,6 +852,8 @@ def main():
             state["improvement_intensity"] = args.improvement_intensity
         if args.view_granularity:
             state["view_granularity"] = args.view_granularity
+        if args.interactive_mode:
+            state["interactive_mode"] = args.interactive_mode
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     else:
         state = seed_state(
@@ -841,6 +864,7 @@ def main():
             args.browser,
             args.improvement_intensity or DEFAULT_IMPROVEMENT_INTENSITY,
             args.view_granularity or DEFAULT_VIEW_GRANULARITY,
+            args.interactive_mode or DEFAULT_INTERACTIVE_MODE,
         )
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
