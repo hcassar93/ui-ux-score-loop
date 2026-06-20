@@ -304,6 +304,14 @@ def row_attrs(viewport, mode, kind, page=None, view=None):
     return attrs
 
 
+def context_row_attrs(kind, context):
+    return (
+        f' data-context-row="{esc(context)}"'
+        f' data-row-kind="{esc(kind)}"'
+        f' data-context-id="{esc(context)}"'
+    )
+
+
 def sticky_label(title, meta="", classes="", marker=""):
     title_class = "text-white" if "text-white" in classes else "text-neutral-950"
     meta_class = "text-neutral-300" if "text-white" in classes else "text-neutral-500"
@@ -331,7 +339,11 @@ def disclosure_label(title, meta, target_type, target_id, classes="", marker="")
         if marker
         else ""
     )
-    target_attr = "data-toggle-page" if target_type == "page" else "data-toggle-view"
+    target_attr = {
+        "context": "data-toggle-context",
+        "page": "data-toggle-page",
+        "view": "data-toggle-view",
+    }[target_type]
     return (
         f'<th class="sticky left-0 z-10 border-b border-r border-neutral-200 {bg_class} '
         f'px-3 py-2 text-left align-top {classes}">'
@@ -445,22 +457,39 @@ def render(template, state):
         ] = item
 
     matrix_rows = []
+    context_id = "flow-context"
     for label, key in (("Changes", "changes"), ("Decision", "decision"), ("Why", "why")):
+        label_cell = (
+            disclosure_label(
+                label,
+                "Flow / iteration context",
+                "context",
+                context_id,
+                "bg-neutral-50",
+                "bg-neutral-400",
+            )
+            if key == "changes"
+            else sticky_label(
+                label,
+                "Flow / iteration context",
+                "bg-neutral-50",
+                "bg-neutral-400",
+            )
+        )
         matrix_rows.append(
             row(
                 [
-                    sticky_label(
-                        label,
-                        "Flow / iteration context",
-                        "bg-neutral-50",
-                        "bg-neutral-400",
-                    ),
+                    label_cell,
                     *iteration_value_cells(
                         iteration_numbers,
                         lambda number, key=key: (iteration_by_number.get(number) or {}).get(key),
                         "border-b border-r border-neutral-200 bg-neutral-50 px-3 py-2 align-top text-neutral-700",
                     ),
-                ]
+                ],
+                context_row_attrs(
+                    "context" if key == "changes" else "context-detail",
+                    context_id,
+                ),
             )
         )
 

@@ -93,6 +93,8 @@
       const viewportSelect = document.querySelector("[data-viewport-select]");
       const modeSelect = document.querySelector("[data-mode-select]");
       const rows = document.querySelectorAll("[data-viewport-row]");
+      const contextRows = document.querySelectorAll("[data-context-row]");
+      const contextToggles = document.querySelectorAll("[data-toggle-context]");
       const pageToggles = document.querySelectorAll("[data-toggle-page]");
       const viewToggles = document.querySelectorAll("[data-toggle-view]");
       const expandAllButton = document.querySelector("[data-expand-all]");
@@ -102,6 +104,7 @@
       const screenshotModalImage = document.querySelector("[data-screenshot-modal-image]");
       const screenshotModalPath = document.querySelector("[data-screenshot-modal-path]");
       const screenshotModalClose = document.querySelector("[data-screenshot-modal-close]");
+      const collapsedContexts = new Set();
       const collapsedPages = new Set();
       const collapsedViews = new Set();
       let selectedViewport = "all";
@@ -121,6 +124,17 @@
           row.hidden = !(viewportMatch && modeMatch) || hiddenByCollapse;
         });
 
+        contextRows.forEach((row) => {
+          const contextCollapsed =
+            row.dataset.contextId && collapsedContexts.has(row.dataset.contextId);
+          row.hidden = contextCollapsed && row.dataset.rowKind !== "context";
+        });
+
+        contextToggles.forEach((button) => {
+          const collapsed = collapsedContexts.has(button.dataset.toggleContext);
+          button.setAttribute("aria-expanded", String(!collapsed));
+          button.textContent = collapsed ? "+" : "-";
+        });
         pageToggles.forEach((button) => {
           const collapsed = collapsedPages.has(button.dataset.togglePage);
           button.setAttribute("aria-expanded", String(!collapsed));
@@ -143,6 +157,16 @@
           applyFilters();
       });
 
+      contextToggles.forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.dataset.toggleContext;
+          collapsedContexts.has(id)
+            ? collapsedContexts.delete(id)
+            : collapsedContexts.add(id);
+          applyFilters();
+        });
+      });
+
       pageToggles.forEach((button) => {
         button.addEventListener("click", () => {
           const id = button.dataset.togglePage;
@@ -160,12 +184,14 @@
       });
 
       expandAllButton.addEventListener("click", () => {
+        collapsedContexts.clear();
         collapsedPages.clear();
         collapsedViews.clear();
         applyFilters();
       });
 
       collapseAllButton.addEventListener("click", () => {
+        contextToggles.forEach((button) => collapsedContexts.add(button.dataset.toggleContext));
         pageToggles.forEach((button) => collapsedPages.add(button.dataset.togglePage));
         viewToggles.forEach((button) => collapsedViews.add(button.dataset.toggleView));
         applyFilters();

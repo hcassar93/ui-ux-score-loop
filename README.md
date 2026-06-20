@@ -159,12 +159,12 @@ Top: flow name, breakpoint dropdown, light/dark mode dropdown, and small Expand 
 
 Main matrix:
 - columns are iterations
-- first rows show flow-level changes, decision, and why
+- collapsible flow context rows show changes, decision, and why
 - page band rows show page averages
 - indented view groups sit under each page
 - view subrows show score, screenshot, notes, and rubric ratings
 - each breakpoint/mode block ends with a flow average
-- page and view groups can expand/collapse
+- flow context, page, and view groups can expand/collapse
 - screenshot thumbnails open in a modal
 - screenshot thumbnails sit on a contrasting evidence frame
 ```
