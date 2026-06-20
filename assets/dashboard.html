@@ -63,6 +63,20 @@
 
     </main>
 
+    <div class="fixed inset-0 z-50 hidden bg-black/80 p-4" data-screenshot-modal>
+      <div class="flex h-full flex-col gap-3">
+        <div class="flex items-center justify-between gap-3 text-white">
+          <p class="min-w-0 truncate text-xs" data-screenshot-modal-path></p>
+          <button class="rounded-md border border-white/30 px-3 py-1.5 text-sm" type="button" data-screenshot-modal-close>
+            Close
+          </button>
+        </div>
+        <div class="flex min-h-0 flex-1 items-center justify-center">
+          <img class="max-h-full max-w-full rounded-md bg-white object-contain" alt="" data-screenshot-modal-image />
+        </div>
+      </div>
+    </div>
+
     <script>
       const viewportSelect = document.querySelector("[data-viewport-select]");
       const modeSelect = document.querySelector("[data-mode-select]");
@@ -71,6 +85,11 @@
       const viewToggles = document.querySelectorAll("[data-toggle-view]");
       const expandAllButton = document.querySelector("[data-expand-all]");
       const collapseAllButton = document.querySelector("[data-collapse-all]");
+      const screenshotButtons = document.querySelectorAll("[data-screenshot-src]");
+      const screenshotModal = document.querySelector("[data-screenshot-modal]");
+      const screenshotModalImage = document.querySelector("[data-screenshot-modal-image]");
+      const screenshotModalPath = document.querySelector("[data-screenshot-modal-path]");
+      const screenshotModalClose = document.querySelector("[data-screenshot-modal-close]");
       const collapsedPages = new Set();
       const collapsedViews = new Set();
       let selectedViewport = "all";
@@ -138,6 +157,32 @@
         pageToggles.forEach((button) => collapsedPages.add(button.dataset.togglePage));
         viewToggles.forEach((button) => collapsedViews.add(button.dataset.toggleView));
         applyFilters();
+      });
+
+      function closeScreenshotModal() {
+        screenshotModal.classList.add("hidden");
+        screenshotModalImage.removeAttribute("src");
+        screenshotModalPath.textContent = "";
+      }
+
+      screenshotButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const src = button.dataset.screenshotSrc;
+          screenshotModalImage.src = src;
+          screenshotModalImage.alt = src;
+          screenshotModalPath.textContent = src;
+          screenshotModal.classList.remove("hidden");
+        });
+      });
+
+      screenshotModalClose.addEventListener("click", closeScreenshotModal);
+      screenshotModal.addEventListener("click", (event) => {
+        if (event.target === screenshotModal) closeScreenshotModal();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !screenshotModal.classList.contains("hidden")) {
+          closeScreenshotModal();
+        }
       });
     </script>
   </body>
