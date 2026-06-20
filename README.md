@@ -50,7 +50,7 @@ If the app supports light/dark mode, test both. Otherwise use the app's default 
 Copy this into any agent:
 
 ```text
-Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Break the flow into pages and views, screenshot and score every view/breakpoint/mode 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep a dashboard with breakpoint/mode-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not overhaul the UI; serve the user.
+Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create a dashboard before scoring. Break the flow into pages and views, screenshot and score every view/breakpoint/mode 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep the dashboard updated with breakpoint/mode-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without giving the dashboard path. Do not overhaul the UI; serve the user.
 ```
 
 Use it like this:
@@ -64,11 +64,13 @@ Modes: if light/dark is supported, test light and dark; otherwise use default.
 
 Use a real browser. Complete the flow once without editing at each breakpoint/mode combination, then break it into pages and views, including modals, popovers, drawers, empty states, loading states, error states, and success states. This first pass is iteration 0. Screenshot every view at each breakpoint/mode.
 
-Create a dashboard. Score every view/breakpoint/mode from 0-100 against these principles: visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance and harmony, consistency, visual cues, depth and texture, color theory, typography, and interaction cost. View score is the average of its principle scores. Page score is the average of its views, breakpoints, and modes. Flow score is the average of its pages.
+Create a dashboard before scoring and explicitly deliver its path in the final answer. Score every view/breakpoint/mode from 0-100 against these principles: visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance and harmony, consistency, visual cues, depth and texture, color theory, typography, and interaction cost. View score is the average of its principle scores. Page score is the average of its views, breakpoints, and modes. Flow score is the average of its pages.
 
 The scores are the loop signal. Improve the lowest-scoring principle/view pair that is user-impactful, safe to change, and likely to improve the flow. Each iteration may include multiple related changes, but keep them manageable, clearly connected to the target score, and easy to review. Do not overhaul the UI.
 
 Rerun the same flow after each iteration, capture a new screenshot for every affected view, rescore, update the dashboard, and record the delta. Keep the iteration only if it improves the target score without creating a worse problem elsewhere. Repeat until the completion criterion is met, progress stalls, or the next change needs approval.
+
+Final answer must include the dashboard path, state file path, screenshot root, completion status, current score, and next target if unfinished.
 
 Serve the user. Reduce confusion, hesitation, rework, anxiety, waiting, and avoidable choice. Preserve the product's brand, voice, information architecture, and working behavior. Do not add decorative AI slop, generic gradients, random cards, unnecessary animation, or novelty that does not help the flow. Ask before changing navigation, pricing, auth, destructive actions, business logic, or product strategy.
 ```
@@ -167,7 +169,7 @@ Status:
 | --- | --- | ---: | --- | ---: | ---: | ---: |
 ```
 
-The skill version includes a minimal Tailwind dashboard template and a helper. The agent should edit `data/state.json`, keep short rationale in `data/ratings.md`, and regenerate the dashboard:
+The skill version includes a minimal Tailwind dashboard template and a helper. The agent must create or refresh the dashboard before scoring, edit `data/state.json`, keep short rationale in `data/ratings.md`, regenerate the dashboard, and give the dashboard path in its final answer:
 
 ```bash
 python3 scripts/create_dashboard.py --flow "Signup"
@@ -192,7 +194,7 @@ The UI/UX score loop
 Prompt:
 
 ```text
-Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Break the flow into pages and views, screenshot and score every view/breakpoint/mode 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep a dashboard with breakpoint/mode-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not overhaul the UI; serve the user.
+Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create a dashboard before scoring. Break the flow into pages and views, screenshot and score every view/breakpoint/mode 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep the dashboard updated with breakpoint/mode-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without giving the dashboard path. Do not overhaul the UI; serve the user.
 ```
 
 Source link after publishing:

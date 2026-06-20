@@ -1,4 +1,4 @@
 interface:
   display_name: "UI/UX Score Loop"
   short_description: "Browser UX scoring loop with dashboard"
-  default_prompt: "Use $ui-ux-score-loop to improve one specified product flow with browser screenshots, UI/UX scores, and a dashboard."
+  default_prompt: "Use $ui-ux-score-loop to improve one specified product flow with browser screenshots, UI/UX scores, and a delivered dashboard."

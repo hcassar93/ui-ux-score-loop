@@ -12,7 +12,7 @@ Improve exactly one user flow by using browser evidence and 0-100 scores as the 
 When the user invokes this skill, run this loop unless they ask only for advice:
 
 ```text
-Run UI/UX Score Loop on [FLOW] at [URL] with one completion criterion: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations. Use a real browser. Unless viewports are supplied, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Complete the flow once without editing as iteration 0, break it into pages and views, and screenshot every view at every breakpoint and mode. Score each view/breakpoint/mode 0-100 against the UI/UX principles, update an iteration dashboard, improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, record deltas, and repeat until the criterion is met, progress stalls, or approval is needed.
+Run UI/UX Score Loop on [FLOW] at [URL] with one completion criterion: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations. Use a real browser. Unless viewports are supplied, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create or refresh `.ui-ux-score-loop/dashboard.html` before scoring, then complete the flow once without editing as iteration 0, break it into pages and views, and screenshot every view at every breakpoint and mode. Score each view/breakpoint/mode 0-100 against the UI/UX principles, update the dashboard after each iteration, improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, record deltas, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without clearly giving the user the dashboard path.
 ```
 
 If the flow, URL, or completion criterion is missing, ask only for the missing input.
@@ -22,13 +22,14 @@ If the flow, URL, or completion criterion is missing, ask only for the missing i
 1. Confirm the flow, URL, concerns, off-limits areas, one completion criterion, any custom viewports, and whether light/dark mode is supported.
 2. If custom viewports are not supplied, use phone 390x844, tablet 768x1024, and laptop 1440x900.
 3. If the app supports light/dark mode, test both light and dark. If not, use one `default` mode.
-4. Use a real browser to complete the flow once without editing as iteration 0 at each breakpoint/mode combination.
-5. Break the flow into pages and views, including modals, popovers, drawers, empty, loading, error, and success states.
-6. Screenshot every view at each breakpoint/mode.
-7. Score each view/breakpoint/mode from 0-100 against the principles below.
-8. Update the dashboard with mode, breakpoint, view, page, flow, and principle averages.
-9. Improve the lowest user-impactful, safely changeable principle/view/breakpoint/mode score with manageable related changes that clearly target the score.
-10. Rerun the same flow, capture new screenshots for affected views, breakpoints, and modes, rescore, record deltas, and keep the iteration only if it improves the target without creating a worse problem elsewhere.
+4. Run the dashboard helper immediately so `.ui-ux-score-loop/dashboard.html`, `data/`, `screenshots/`, and the gitignore entry exist before evidence is captured.
+5. Use a real browser to complete the flow once without editing as iteration 0 at each breakpoint/mode combination.
+6. Break the flow into pages and views, including modals, popovers, drawers, empty, loading, error, and success states.
+7. Screenshot every view at each breakpoint/mode.
+8. Score each view/breakpoint/mode from 0-100 against the principles below.
+9. Update and regenerate the dashboard with mode, breakpoint, view, page, flow, and principle averages.
+10. Improve the lowest user-impactful, safely changeable principle/view/breakpoint/mode score with manageable related changes that clearly target the score.
+11. Rerun the same flow, capture new screenshots for affected views, breakpoints, and modes, rescore, record deltas, and keep the iteration only if it improves the target without creating a worse problem elsewhere.
 
 Stop when the completion criterion is met, two passes stall, or the next best change needs approval.
 
@@ -84,3 +85,15 @@ Use `assets/dashboard.html` as a template asset; do not paste it into chat unles
 Do not hand-edit `dashboard.html`. Update `data/state.json` and `data/ratings.md`, then rerun the script.
 
 The dashboard must show iteration history: iteration number, breakpoint, mode, changes, screenshot for each view at that iteration, old/new ratings, deltas, and why the iteration better serves the user. It should allow intuitive switching by breakpoint and by light/dark mode.
+
+## Final Answer Contract
+
+Always deliver the dashboard explicitly. The final answer must include:
+
+- The path to `.ui-ux-score-loop/dashboard.html`.
+- The path to `.ui-ux-score-loop/data/state.json`.
+- The screenshot root path.
+- The completion status and current flow score or best available score.
+- The next target if the loop is not complete.
+
+Do not treat the dashboard as an internal artifact. If the dashboard could not be generated, say why and give the exact command or blocker.
