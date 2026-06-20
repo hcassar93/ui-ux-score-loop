@@ -1,29 +1,29 @@
 ---
 name: ui-ux-score-loop
-description: Browser-based UI/UX improvement loop for one specified product flow. Use when the user asks to inspect, score, improve, or iteratively test a flow such as signup, login, password reset, checkout, create/edit/delete/share, onboarding, or another key UI path using a selected real browser, screenshots, responsive breakpoints, light/dark modes, 0-100 UX rubric scores, and a dashboard state file.
+description: Browser-based UI/UX improvement loop for one or more specified product flows. Use when the user asks to inspect, score, improve, or iteratively test flows such as signup, login, password reset, checkout, create/edit/delete/share, onboarding, or other key UI paths using a selected real browser, screenshots, responsive breakpoints, light/dark modes, 0-100 UX rubric scores, and dashboard state files.
 ---
 
 # UI/UX Score Loop
 
-Improve exactly one user flow by using browser evidence and 0-100 scores as the loop signal.
+Improve one user flow, or multiple related user flows, by using browser evidence and 0-100 scores as the loop signal.
 
 ## Start Prompt
 
 When the user invokes this skill, run this loop unless they ask only for advice:
 
 ```text
-Run UI/UX Score Loop on [FLOW] at [URL or app environment] with one completion criterion: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations. Use a real browser. A flow name is a user goal, not a route: "login flow" does not mean start at `/login`. If the user supplies a URL, start at that exact URL. If the user asks you to start or find an environment but gives no URL, identify the app origin and start at its root `/`. Do not open a deeper route such as `/login`, `/signup`, or `/reset-password` unless the user explicitly supplied that route or the root redirects there. Explore the flow as fully as a real user would from the entry point, splitting necessary steps, alternate states, modals, popovers, waiting/loading, errors, and recovery paths into separate analysis views. Act as a human proxy, not an agent: prefer visible navigation over guessed routes, assume imperfect memory and possible mistakes, value clear progress while waiting, and judge only what the UI explains without console logs or technical knowledge. For auth flows, include visible password reset/recovery as part of the audit unless the user excludes it. If a browser/tool is specified, use it unless it cannot faithfully run the flow; otherwise prefer an integrated browser such as the Codex in-app/browser panel or the IDE integrated browser, then fall back to Playwright MCP or another external browser when needed. Unless viewports are supplied, test phone 390x844, tablet 768x1024, and laptop 1440x900. Discover theme support at the app level, not only on the entry page: check root/home, app shell after login when credentials exist, settings/profile/header controls, persisted theme keys, html classes/data attributes, CSS/framework dark-mode support, and browser color-scheme emulation. If light and dark can be activated reliably, always test both even when no toggle is visible on the login page; record how each mode was set. If no support is discoverable, use `default` mode. Improvement intensity defaults to `grouped` unless specified: `focused` changes one highest-leverage issue per view, `grouped` changes a few logically related issues per view, and `broad` changes all safe identified issues per view. Apply intensity per view, not once for the whole iteration; in each iteration, improve every view that has a safe useful improvement, while leaving views alone when nothing should change. Create or refresh `.ui-ux-score-loop/dashboard.html` before scoring, then complete the flow once without editing as iteration 0, break it into pages and views, and screenshot every view at every breakpoint and mode. Score each view/breakpoint/mode 0-100 against the UI/UX principles, update the dashboard after each iteration, improve the lowest user-impactful safe scores according to the intensity setting with brand-consistent changes, rerun from the same entry point, rescore, record deltas, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without clearly giving the user the dashboard path and browser used.
+Run UI/UX Score Loop on [FLOW or FLOWS] at [URL or app environment] with one completion criterion: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations. Use a real browser. A flow name is a user goal, not a route: "login flow" does not mean start at `/login`. If the user supplies a URL, start at that exact URL. If the user asks you to start or find an environment but gives no URL, identify the app origin and start at its root `/`. Do not open a deeper route such as `/login`, `/signup`, or `/reset-password` unless the user explicitly supplied that route or the root redirects there. For each requested flow, create a separate `.ui-ux-score-loop/flows/{flow-id}/dashboard.html`, state file, ratings file, and screenshots folder. When multiple related flows are requested, audit and improve them in relation to each other: compare shared components, copy, spacing, validation, loading, recovery, and visual states before changing shared UI so consistency improves across flows. Explore each flow as fully as a real user would from the entry point, splitting necessary steps, alternate states, modals, popovers, waiting/loading, errors, and recovery paths into separate analysis views. Act as a human proxy, not an agent: prefer visible navigation over guessed routes, assume imperfect memory and possible mistakes, value clear progress while waiting, and judge only what the UI explains without console logs or technical knowledge. For auth flows, include visible password reset/recovery as part of the audit unless the user excludes it. If a browser/tool is specified, use it unless it cannot faithfully run the flow; otherwise prefer an integrated browser such as the Codex in-app/browser panel or the IDE integrated browser, then fall back to Playwright MCP or another external browser when needed. Unless viewports are supplied, test phone 390x844, tablet 768x1024, and laptop 1440x900. Discover theme support at the app level, not only on the entry page: check root/home, app shell after login when credentials exist, settings/profile/header controls, persisted theme keys, html classes/data attributes, CSS/framework dark-mode support, and browser color-scheme emulation. If light and dark can be activated reliably, always test both even when no toggle is visible on the login page; record how each mode was set. If no support is discoverable, use `default` mode. Improvement intensity defaults to `grouped` unless specified: `focused` changes one highest-leverage issue per view, `grouped` changes a few logically related issues per view, and `broad` changes all safe identified issues per view. Apply intensity per view, not once for the whole iteration; in each iteration, improve every view that has a safe useful improvement, while leaving views alone when nothing should change. Create or refresh the flow dashboard before scoring, then complete each flow once without editing as iteration 0, break it into pages and views, and screenshot every view at every breakpoint and mode. Score each view/breakpoint/mode 0-100 against the UI/UX principles, update each dashboard after each iteration, improve the lowest user-impactful safe scores according to the intensity setting with brand-consistent changes, rerun from the same entry point, rescore, record deltas, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without clearly giving the user each dashboard path and browser used.
 ```
 
 If the flow or completion criterion is missing, ask only for the missing input. If the URL is missing but the user asks you to start or inspect an app/environment, first try to identify the app origin and use `/`; ask for a URL only if no app URL can be found.
 
 ## Workflow
 
-1. Confirm the flow, URL or discoverable app environment, concerns, off-limits areas, one completion criterion, any custom viewports, any browser/tool preference, whether light/dark mode is specified, and the improvement intensity. If intensity is not specified, use `grouped`.
+1. Confirm the flow or flows, URL or discoverable app environment, concerns, off-limits areas, one completion criterion, any custom viewports, any browser/tool preference, whether light/dark mode is specified, and the improvement intensity. If intensity is not specified, use `grouped`.
 2. If custom viewports are not supplied, use phone 390x844, tablet 768x1024, and laptop 1440x900.
 3. Discover theme support before finalizing modes. Check the root/home page, authenticated app shell when credentials are available, settings/profile/header controls, persisted theme keys, html classes/data attributes, CSS/framework dark-mode support, and browser `prefers-color-scheme` emulation. If light and dark can be activated reliably, test both automatically even if the login page itself has no visible toggle. If support is specified by the user, test the specified modes. If no support is discoverable, use one `default` mode. Record how each mode was set.
 4. Select the browser/tool. Prefer the user's requested browser if it can exercise the flow. If no preference is supplied, prefer an integrated browser. Use an external browser only when the integrated browser is unavailable, cannot set the needed viewport/mode, cannot capture screenshots, lacks required session/auth state, or cannot reach the target.
-5. Run the dashboard helper immediately so `.ui-ux-score-loop/dashboard.html`, `data/`, `screenshots/`, and the gitignore entry exist before evidence is captured.
+5. Run the dashboard helper once per requested flow immediately so each `.ui-ux-score-loop/flows/{flow-id}/dashboard.html`, that flow's `data/`, that flow's `screenshots/`, and the gitignore entry exist before evidence is captured.
 6. Choose the entry point as a human would. A flow name is not a route. If the user supplies a URL, start at that exact URL for iteration 0. If the user asks you to start/find an app but supplies no URL, identify the app origin and start at `/`. For a login flow, begin at `/` and follow visible navigation or redirects into auth; do not start at `/login` unless the user explicitly supplied `/login` or `/` redirects there.
 7. Explore the flow as fully as possible from that start, following the path a human is likely to take. Prefer visible links, buttons, and navigation over guessed routes or internal knowledge. Break the flow into pages and views, including entry screens, route transitions, forms, validation states, modals, popovers, drawers, empty, loading, error, success, and post-completion states.
 8. Treat obvious alternate or recovery paths that serve the same user goal as analysis views. For auth flows, include visible forgot-password/reset-password states unless the user excludes them.
@@ -66,7 +66,7 @@ Accept optional browser guidance such as:
 - `Browser: Chrome with my logged-in session`
 - `Browser: prefer integrated`
 
-Choose the browser that best preserves the real user experience and required state. Prefer integrated browser tooling for local app flows because it keeps screenshots and interactions close to the workspace. Use Playwright MCP or another external browser when it is better for viewport automation, repeatable screenshots, auth/session access, cross-browser behavior, or when integrated tooling is unavailable. Record the preference, selected browser, and reason in `.ui-ux-score-loop/data/state.json`.
+Choose the browser that best preserves the real user experience and required state. Prefer integrated browser tooling for local app flows because it keeps screenshots and interactions close to the workspace. Use Playwright MCP or another external browser when it is better for viewport automation, repeatable screenshots, auth/session access, cross-browser behavior, or when integrated tooling is unavailable. Record the preference, selected browser, and reason in `.ui-ux-score-loop/flows/{flow-id}/data/state.json`.
 
 ## Dashboard
 
@@ -76,12 +76,14 @@ Run the dashboard helper before taking screenshots or writing ratings. The helpe
 
 Use this structure:
 
-- `.ui-ux-score-loop/dashboard.html`: generated Tailwind dashboard.
-- `.ui-ux-score-loop/data/state.json`: structured source of truth for improvement intensity, iterations, view scores, rubric scores, and next target.
-- `.ui-ux-score-loop/data/ratings.md`: short human notes and rationale that should not clutter tables.
-- `.ui-ux-score-loop/screenshots/iteration-000/{breakpoint}/{mode}/001-view-name.png`: baseline screenshots.
-- `.ui-ux-score-loop/screenshots/iteration-001/{breakpoint}/{mode}/001-view-name.png`: first changed iteration screenshots.
+- `.ui-ux-score-loop/flows/{flow-id}/dashboard.html`: generated Tailwind dashboard for one flow.
+- `.ui-ux-score-loop/flows/{flow-id}/data/state.json`: structured source of truth for that flow's improvement intensity, iterations, view scores, rubric scores, and next target.
+- `.ui-ux-score-loop/flows/{flow-id}/data/ratings.md`: short human notes and rationale that should not clutter that flow's dashboard table.
+- `.ui-ux-score-loop/flows/{flow-id}/screenshots/iteration-000/{breakpoint}/{mode}/001-view-name.png`: baseline screenshots.
+- `.ui-ux-score-loop/flows/{flow-id}/screenshots/iteration-001/{breakpoint}/{mode}/001-view-name.png`: first changed iteration screenshots.
 - Continue with zero-padded iteration folders.
+
+Use one flow folder per audited flow. This prevents login, signup, checkout, or other flows from overwriting each other's state and screenshots. When multiple related flows are audited together, keep each flow's dashboard separate but compare shared components, copy, spacing, states, and decisions across the flow folders before making changes so consistency improves together.
 
 Name screenshots by the view's order in the flow. Use `001`, `002`, `003`, etc. so files sort naturally. Keep the same number for the same view across breakpoints and iterations.
 
@@ -89,6 +91,12 @@ Use `scripts/create_dashboard.py` to create or refresh the dashboard workspace:
 
 ```bash
 python3 scripts/create_dashboard.py --flow "Signup"
+```
+
+This creates `.ui-ux-score-loop/flows/signup/dashboard.html` by default. Use `--flow-id` for a stable custom folder name:
+
+```bash
+python3 scripts/create_dashboard.py --flow "Sign up" --flow-id signup
 ```
 
 To seed a custom viewport set, pass repeated viewport flags:
@@ -105,7 +113,7 @@ Improvement intensity options:
 
 Use `assets/dashboard.html` as a template asset; do not paste it into chat unless the user asks.
 
-Do not hand-edit `dashboard.html`. Update `data/state.json` and `data/ratings.md`, then rerun the script.
+Do not hand-edit `dashboard.html`. Update the flow's `data/state.json` and `data/ratings.md`, then rerun the script.
 
 The dashboard must be information dense, not a written report. Keep the top minimal: flow name, subtle Expand all / Collapse all text controls, breakpoint dropdown, and light/dark mode dropdown. Put the expand/collapse controls to the left of the dropdowns and style them as secondary text, not prominent buttons. Do not put status chips, next-target boxes, explanatory copy, or summary cards above the table. The main view must be one comparison matrix with iterations as columns and an obvious hierarchy: collapsible flow context rows, page band rows, then indented view groups. Flow context, page rows, and view rows must work like an accordion so the user can collapse noisy detail. Each page band should show that page's average for each iteration. Each view header row should show that view's score, delta, weakest principle, and screenshot thumbnail for each iteration; do not create a separate screenshot row. Screenshot thumbnails must remain visible when a view group is collapsed, sit on a contrasting evidence frame, and open a large modal preview. View detail rows should contain notes and rubric ratings. End each breakpoint/mode block with a flow average row.
 
@@ -113,9 +121,9 @@ The dashboard must be information dense, not a written report. Keep the top mini
 
 Always deliver the dashboard explicitly. The final answer must include:
 
-- The path to `.ui-ux-score-loop/dashboard.html`.
-- The path to `.ui-ux-score-loop/data/state.json`.
-- The screenshot root path.
+- The path to each `.ui-ux-score-loop/flows/{flow-id}/dashboard.html`.
+- The path to each `.ui-ux-score-loop/flows/{flow-id}/data/state.json`.
+- The screenshot root path for each flow.
 - The browser/tool used and why.
 - The completion status and current flow score or best available score.
 - The next target if the loop is not complete.
