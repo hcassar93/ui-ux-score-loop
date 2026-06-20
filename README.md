@@ -164,6 +164,7 @@ Main matrix:
 - each breakpoint/mode block ends with a flow average
 - page and view groups can expand/collapse
 - screenshot thumbnails open in a modal
+- screenshot thumbnails sit on a contrasting evidence frame
 ```
 
 The skill version includes a minimal Tailwind dashboard template and a helper. The agent must create or refresh the dashboard before scoring, edit `data/state.json`, keep short rationale in `data/ratings.md`, regenerate the dashboard, and give the dashboard path in its final answer:

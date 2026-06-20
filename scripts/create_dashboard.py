@@ -353,9 +353,12 @@ def screenshot_cell(item):
     return (
         f'<button type="button" class="block text-left" data-screenshot-src="{safe_path}" '
         f'aria-label="Open screenshot {safe_path}">'
+        f'<span class="screenshot-frame flex h-36 w-56 items-center justify-center rounded-md '
+        f'border border-neutral-400 p-2 shadow-inner">'
         f'<img src="{safe_path}" alt="{safe_path}" '
-        f'onerror="this.style.display=\'none\';this.nextElementSibling.textContent=\'Missing screenshot\';" '
-        f'class="h-36 w-56 rounded border border-neutral-200 bg-neutral-50 object-contain" />'
+        f'onerror="this.style.display=\'none\';this.parentElement.nextElementSibling.textContent=\'Missing screenshot\';" '
+        f'class="max-h-full max-w-full rounded-sm bg-white object-contain shadow-sm ring-2 ring-neutral-500/40" />'
+        f"</span>"
         f'<span class="mt-1 block max-w-56 truncate text-[10px] text-neutral-400">{safe_path}</span>'
         f"</button>"
     )
