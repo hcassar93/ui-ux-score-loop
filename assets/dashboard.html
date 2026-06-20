@@ -16,29 +16,25 @@
             </p>
             <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">{{FLOW_NAME}}</h1>
           </div>
-          <div class="flex flex-wrap gap-2 text-xs">
-            {{SUMMARY_CHIPS}}
-          </div>
+          <nav class="flex flex-wrap gap-2">
+            <div>
+              <label class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-neutral-500" for="viewport-filter">
+                Breakpoint
+              </label>
+              <select id="viewport-filter" class="h-9 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-950" data-viewport-select>
+                {{VIEWPORT_OPTIONS}}
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-neutral-500" for="mode-filter">
+                Mode
+              </label>
+              <select id="mode-filter" class="h-9 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-950" data-mode-select>
+                {{MODE_OPTIONS}}
+              </select>
+            </div>
+          </nav>
         </div>
-
-        <nav class="mt-3 grid gap-2 lg:grid-cols-[1fr_1fr_auto]">
-          <div>
-            <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Breakpoint</p>
-            <div class="flex flex-wrap gap-1.5" data-viewport-controls>
-              {{VIEWPORT_BUTTONS}}
-            </div>
-          </div>
-          <div>
-            <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Mode</p>
-            <div class="flex flex-wrap gap-1.5" data-mode-controls>
-              {{MODE_BUTTONS}}
-            </div>
-          </div>
-          <div class="min-w-48 rounded border border-neutral-200 bg-white px-3 py-2 text-xs">
-            <p class="font-semibold text-neutral-950">Next</p>
-            <p class="mt-0.5 text-neutral-600">{{NEXT_TARGET}}</p>
-          </div>
-        </nav>
       </header>
 
       <section class="mt-4 overflow-x-auto rounded-md border border-neutral-200 bg-white">
@@ -60,23 +56,11 @@
     </main>
 
     <script>
-      const viewportButtons = document.querySelectorAll("[data-viewport-filter]");
-      const modeButtons = document.querySelectorAll("[data-mode-filter]");
+      const viewportSelect = document.querySelector("[data-viewport-select]");
+      const modeSelect = document.querySelector("[data-mode-select]");
       const rows = document.querySelectorAll("[data-viewport-row]");
       let selectedViewport = "all";
       let selectedMode = "all";
-
-      function setActive(buttons, activeButton) {
-        buttons.forEach((candidate) => {
-          const active = candidate === activeButton;
-          candidate.classList.toggle("bg-neutral-950", active);
-          candidate.classList.toggle("text-white", active);
-          candidate.classList.toggle("border-neutral-950", active);
-          candidate.classList.toggle("bg-white", !active);
-          candidate.classList.toggle("text-neutral-700", !active);
-          candidate.classList.toggle("border-neutral-200", !active);
-        });
-      }
 
       function applyFilters() {
         rows.forEach((row) => {
@@ -88,20 +72,14 @@
         });
       }
 
-      viewportButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedViewport = button.dataset.viewportFilter;
-          setActive(viewportButtons, button);
+      viewportSelect.addEventListener("change", () => {
+          selectedViewport = viewportSelect.value;
           applyFilters();
-        });
       });
 
-      modeButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedMode = button.dataset.modeFilter;
-          setActive(modeButtons, button);
+      modeSelect.addEventListener("change", () => {
+          selectedMode = modeSelect.value;
           applyFilters();
-        });
       });
     </script>
   </body>

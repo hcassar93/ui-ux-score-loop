@@ -341,64 +341,33 @@ def render(template, state):
             if isinstance(item.get("iteration", 0), int)
         }
     ) or [0]
-    latest_flow = latest(iterations, "flow_score")
-    latest_delta = latest(iterations, "delta")
-    lowest_view = min(
-        [view for view in views if isinstance(view.get("score"), (int, float))],
-        key=lambda view: view["score"],
-        default={},
-    )
     iteration_by_number = {
         item.get("iteration", 0): item for item in iterations if isinstance(item, dict)
     }
 
-    concerns = state.get("concerns") or []
-    concern_text = ", ".join(concerns) if isinstance(concerns, list) else str(concerns)
     viewports = state.get("viewports") or DEFAULT_VIEWPORTS
-    viewport_text = ", ".join(viewport_label(viewport) for viewport in viewports)
     modes = state.get("color_modes") or DEFAULT_COLOR_MODES
-    mode_text = ", ".join(modes)
-    viewport_buttons = "\n".join(
+    viewport_options = "\n".join(
         [
-            '<button class="rounded-full border border-neutral-950 bg-neutral-950 px-3 py-1 text-sm text-white" data-viewport-filter="all">All</button>'
+            '<option value="all">All breakpoints</option>'
         ]
         + [
             (
-                f'<button class="rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm text-neutral-700" '
-                f'data-viewport-filter="{esc(viewport["name"])}">{esc(viewport_label(viewport))}</button>'
+                f'<option value="{esc(viewport["name"])}">{esc(viewport_label(viewport))}</option>'
             )
             for viewport in viewports
         ]
     )
-    mode_buttons = "\n".join(
+    mode_options = "\n".join(
         [
-            '<button class="rounded-full border border-neutral-950 bg-neutral-950 px-3 py-1 text-sm text-white" data-mode-filter="all">All</button>'
+            '<option value="all">All modes</option>'
         ]
         + [
             (
-                f'<button class="rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm text-neutral-700" '
-                f'data-mode-filter="{esc(mode)}">{esc(mode)}</button>'
+                f'<option value="{esc(mode)}">{esc(mode)}</option>'
             )
             for mode in modes
         ]
-    )
-    next_improvement = state.get("next_improvement", {})
-    summary_chips = "\n".join(
-        (
-            f'<span class="rounded border border-neutral-200 bg-white px-2.5 py-1">'
-            f'<span class="text-neutral-500">{label}</span> '
-            f'<span class="font-semibold tabular-nums">{esc(value)}</span>'
-            f"</span>"
-        )
-        for label, value in (
-            ("Score", latest_flow),
-            ("Delta", delta_text(latest_delta) or "--"),
-            ("Target", state.get("target_score")),
-            ("Status", state.get("status")),
-            ("Browser", browser_label(state)),
-            ("Views", len({view_key(item) for item in views})),
-            ("Iterations", len(iteration_numbers)),
-        )
     )
     matrix_header = "\n".join(
         (
@@ -621,25 +590,10 @@ def render(template, state):
 
     replacements = {
         "{{FLOW_NAME}}": esc(state.get("flow")),
-        "{{TARGET_SCORE}}": esc(state.get("target_score")),
-        "{{COMPLETION}}": esc(state.get("completion")),
-        "{{FLOW_SCORE}}": esc(latest_flow),
-        "{{FLOW_DELTA}}": esc(latest_delta),
-        "{{LOWEST_PAGE}}": esc(lowest_view.get("page")),
-        "{{LOWEST_VIEW}}": esc(lowest_view.get("view")),
-        "{{NEXT_TARGET}}": esc(next_improvement.get("target")),
-        "{{USER_GOAL}}": esc(state.get("user_goal")),
-        "{{CONCERNS}}": esc(concern_text),
-        "{{VIEWPORTS}}": esc(viewport_text),
-        "{{COLOR_MODES}}": esc(mode_text),
-        "{{VIEWPORT_BUTTONS}}": viewport_buttons,
-        "{{MODE_BUTTONS}}": mode_buttons,
-        "{{SUMMARY_CHIPS}}": summary_chips,
+        "{{VIEWPORT_OPTIONS}}": viewport_options,
+        "{{MODE_OPTIONS}}": mode_options,
         "{{MATRIX_HEADER}}": matrix_header,
         "{{MATRIX_ROWS}}": matrix_rows,
-        "{{STATUS}}": esc(state.get("status")),
-        "{{NEXT_WHY}}": esc(next_improvement.get("why")),
-        "{{EXPECTED_DELTA}}": esc(next_improvement.get("expected_delta")),
     }
 
     for key, value in replacements.items():

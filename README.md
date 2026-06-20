@@ -153,7 +153,7 @@ Keep it simple:
 ```markdown
 # UI/UX Score Loop Dashboard
 
-Top: flow name, compact status chips, breakpoint filter, light/dark filter.
+Top: flow name plus two dropdowns only: breakpoint and light/dark mode.
 
 Main matrix:
 - columns are iterations
