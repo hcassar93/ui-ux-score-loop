@@ -58,9 +58,11 @@ Use this structure:
 - `.ui-ux-score-loop/dashboard.html`: generated Tailwind dashboard.
 - `.ui-ux-score-loop/data/state.json`: structured source of truth for iterations, view scores, rubric scores, and next target.
 - `.ui-ux-score-loop/data/ratings.md`: short human notes and rationale that should not clutter tables.
-- `.ui-ux-score-loop/screenshots/iteration-000/{viewport}/`: baseline screenshots.
-- `.ui-ux-score-loop/screenshots/iteration-001/{viewport}/`: first changed iteration screenshots.
+- `.ui-ux-score-loop/screenshots/iteration-000/{breakpoint}/001-view-name.png`: baseline screenshots.
+- `.ui-ux-score-loop/screenshots/iteration-001/{breakpoint}/001-view-name.png`: first changed iteration screenshots.
 - Continue with zero-padded iteration folders.
+
+Name screenshots by the view's order in the flow. Use `001`, `002`, `003`, etc. so files sort naturally. Keep the same number for the same view across breakpoints and iterations.
 
 Use `scripts/create_dashboard.py` to create or refresh the dashboard workspace:
 
@@ -78,4 +80,4 @@ Use `assets/dashboard.html` as a template asset; do not paste it into chat unles
 
 Do not hand-edit `dashboard.html`. Update `data/state.json` and `data/ratings.md`, then rerun the script.
 
-The dashboard must show iteration history: iteration number, viewport, changes, screenshot for each view at that iteration, old/new ratings, deltas, and why the iteration better serves the user. It should allow intuitive switching between viewport rows.
+The dashboard must show iteration history: iteration number, breakpoint, changes, screenshot for each view at that iteration, old/new ratings, deltas, and why the iteration better serves the user. It should allow intuitive switching between breakpoint rows.

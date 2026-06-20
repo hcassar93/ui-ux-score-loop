@@ -70,9 +70,10 @@ def seed_state(flow, viewports):
             {
                 "page": "Page",
                 "view": "View",
+                "view_number": "001",
                 "viewport": viewport["name"],
                 "iteration": 0,
-                "screenshot": f"screenshots/iteration-000/{viewport['name']}/page-view.png",
+                "screenshot": f"screenshots/iteration-000/{viewport['name']}/001-view.png",
                 "score": None,
                 "delta": None,
                 "lowest_principle": "Clarity",
@@ -84,6 +85,7 @@ def seed_state(flow, viewports):
             {
                 "page": "Page",
                 "view": "View",
+                "view_number": "001",
                 "viewport": viewports[0]["name"],
                 "iteration": 0,
                 "principle": "Clarity",
@@ -139,6 +141,7 @@ def render(template, state):
         row(
             [
                 td(item.get("page")),
+                td(item.get("view_number")),
                 td(item.get("view")),
                 td(item.get("viewport")),
                 td(item.get("iteration"), "px-4 py-3 tabular-nums"),

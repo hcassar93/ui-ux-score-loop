@@ -126,6 +126,8 @@ Generated loop state belongs in `.ui-ux-score-loop/`, which is ignored by git:
   screenshots/
     iteration-000/
       phone/
+        001-login.png
+        002-post-login-home.png
       tablet/
       laptop/
     iteration-001/
@@ -149,8 +151,8 @@ Status:
 | 0 | Baseline |  |  |  |
 
 ## Views
-| Page | View | Viewport | Iteration | Screenshot | Score | Delta | Lowest Principle | User-Serving Note |
-| --- | --- | --- | ---: | --- | ---: | ---: | --- | --- |
+| Page | # | View | Breakpoint | Iteration | Screenshot | Score | Delta | Lowest Principle | User-Serving Note |
+| --- | --- | --- | --- | ---: | --- | ---: | ---: | --- | --- |
 
 ## Principle Scores
 | Page | View | Iteration | Principle | Score | Previous | Delta |
