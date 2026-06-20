@@ -53,6 +53,8 @@ Do not overhaul the UI. Preserve brand, voice, information architecture, and wor
 
 Create loop state only under `.ui-ux-score-loop/`. This directory is intentionally ignored by git and must not be committed.
 
+Run the dashboard helper before taking screenshots or writing ratings. The helper adds `.ui-ux-score-loop/` to the target repository's `.gitignore` before it creates files.
+
 Use this structure:
 
 - `.ui-ux-score-loop/dashboard.html`: generated Tailwind dashboard.

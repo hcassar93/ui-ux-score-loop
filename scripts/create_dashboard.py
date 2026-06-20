@@ -2,6 +2,7 @@
 import argparse
 import html
 import json
+import subprocess
 from pathlib import Path
 
 DEFAULT_VIEWPORTS = [
@@ -44,6 +45,35 @@ def parse_viewport(value):
 
 def viewport_label(viewport):
     return f"{viewport['name']} ({viewport['width']}x{viewport['height']})"
+
+
+def git_root(start):
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=start,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return Path(result.stdout.strip())
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return start
+
+
+def ensure_gitignore(root):
+    gitignore = root / ".gitignore"
+    pattern = ".ui-ux-score-loop/"
+    lines = []
+
+    if gitignore.exists():
+        lines = gitignore.read_text(encoding="utf-8").splitlines()
+
+    if pattern not in lines:
+        with gitignore.open("a", encoding="utf-8") as file:
+            if lines:
+                file.write("\n")
+            file.write(f"{pattern}\n")
 
 
 def seed_state(flow, viewports):
@@ -234,6 +264,7 @@ def main():
     template_path = skill_root / "assets" / "dashboard.html"
     output = Path(args.output).expanduser().resolve()
     workspace = output.parent
+    ensure_gitignore(git_root(Path.cwd()))
     data_dir = workspace / "data"
     screenshots_dir = workspace / "screenshots"
 

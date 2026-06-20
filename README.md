@@ -165,6 +165,8 @@ The skill version includes a minimal Tailwind dashboard template and a helper. T
 python3 scripts/create_dashboard.py --flow "Signup"
 ```
 
+The helper adds `.ui-ux-score-loop/` to the target repository's `.gitignore` before creating dashboard files.
+
 Custom dashboard viewports:
 
 ```bash
