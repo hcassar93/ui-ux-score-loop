@@ -1,0 +1,5 @@
+.ui-ux-score-loop/
+ui-ux-score-loop-dashboard.html
+screenshots/
+*.log
+.DS_Store

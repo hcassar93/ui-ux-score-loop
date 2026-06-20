@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UI/UX Score Loop Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-neutral-50 text-neutral-950 antialiased">
+    <main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <header class="border-b border-neutral-200 pb-5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          UI/UX Score Loop Dashboard
+        </p>
+        <h1 class="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">
+          {{FLOW_NAME}}
+        </h1>
+        <p class="mt-3 max-w-3xl text-sm leading-6 text-neutral-600 sm:text-base">
+          Track screenshots, ratings, notes, and decisions by iteration. Scores
+          are the loop signal: improve the weakest user-impactful score, rerun
+          the same flow, and keep only changes that move the numbers without
+          harming the user.
+        </p>
+        <dl class="mt-4 grid gap-2 text-sm text-neutral-600 sm:grid-cols-3">
+          <div><dt class="font-medium text-neutral-950">Goal</dt><dd>{{USER_GOAL}}</dd></div>
+          <div><dt class="font-medium text-neutral-950">Concerns</dt><dd>{{CONCERNS}}</dd></div>
+          <div><dt class="font-medium text-neutral-950">Completion</dt><dd>{{COMPLETION}}</dd></div>
+          <div><dt class="font-medium text-neutral-950">Status</dt><dd>{{STATUS}}</dd></div>
+        </dl>
+      </header>
+
+      <section class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-lg border border-neutral-200 bg-white p-4">
+          <p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Flow score</p>
+          <p class="mt-3 text-4xl font-semibold tabular-nums">{{FLOW_SCORE}}</p>
+          <p class="mt-1 text-sm text-neutral-500">Target: {{TARGET_SCORE}}</p>
+        </div>
+        <div class="rounded-lg border border-neutral-200 bg-white p-4">
+          <p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Lowest page</p>
+          <p class="mt-3 text-4xl font-semibold tabular-nums">{{LOWEST_PAGE}}</p>
+          <p class="mt-1 text-sm text-neutral-500">Needs attention</p>
+        </div>
+        <div class="rounded-lg border border-neutral-200 bg-white p-4">
+          <p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Lowest view</p>
+          <p class="mt-3 text-4xl font-semibold tabular-nums">{{LOWEST_VIEW}}</p>
+          <p class="mt-1 text-sm text-neutral-500">Needs attention</p>
+        </div>
+        <div class="rounded-lg border border-neutral-200 bg-white p-4">
+          <p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Next target</p>
+          <p class="mt-3 text-4xl font-semibold tabular-nums">{{NEXT_TARGET}}</p>
+          <p class="mt-1 text-sm text-neutral-500">Expected: {{EXPECTED_DELTA}}</p>
+        </div>
+      </section>
+
+      <section class="mt-8">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <h2 class="text-base font-semibold">Iterations</h2>
+            <p class="mt-1 text-sm text-neutral-500">
+              One row per loop pass. Iteration 0 is the untouched baseline.
+            </p>
+          </div>
+        </div>
+        <div class="mt-3 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+          <table class="min-w-full divide-y divide-neutral-200 text-sm">
+            <thead class="bg-neutral-100 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              <tr>
+                <th class="px-4 py-3">Iteration</th>
+                <th class="px-4 py-3">Changes</th>
+                <th class="px-4 py-3 text-right">Flow</th>
+                <th class="px-4 py-3 text-right">Delta</th>
+                <th class="px-4 py-3">Decision</th>
+                <th class="px-4 py-3">Why it serves the user</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-100">
+              {{ITERATION_ROWS}}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="mt-8">
+        <h2 class="text-base font-semibold">View Progress</h2>
+        <p class="mt-1 text-sm text-neutral-500">
+          Add one row per view per iteration. Screenshots should live in
+          <code class="rounded bg-neutral-100 px-1 py-0.5">.ui-ux-score-loop/screenshots/iteration-###/</code>.
+        </p>
+        <div class="mt-3 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+          <table class="min-w-full divide-y divide-neutral-200 text-sm">
+            <thead class="bg-neutral-100 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              <tr>
+                <th class="px-4 py-3">Page</th>
+                <th class="px-4 py-3">View</th>
+                <th class="px-4 py-3">Iteration</th>
+                <th class="px-4 py-3">Screenshot</th>
+                <th class="px-4 py-3 text-right">Score</th>
+                <th class="px-4 py-3 text-right">Delta</th>
+                <th class="px-4 py-3">Lowest principle</th>
+                <th class="px-4 py-3">Notes</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-100">
+              {{VIEW_ROWS}}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="mt-8 grid gap-4 lg:grid-cols-2">
+        <div>
+          <h2 class="text-base font-semibold">Rubric Scores</h2>
+          <p class="mt-1 text-sm text-neutral-500">
+            Keep detailed per-principle ratings in
+            <code class="rounded bg-neutral-100 px-1 py-0.5">.ui-ux-score-loop/data/ratings.md</code>.
+          </p>
+          <div class="mt-3 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm">
+              <thead class="bg-neutral-100 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <tr>
+                  <th class="px-4 py-3">View</th>
+                  <th class="px-4 py-3">Principle</th>
+                  <th class="px-4 py-3 text-right">Old</th>
+                  <th class="px-4 py-3 text-right">New</th>
+                  <th class="px-4 py-3 text-right">Delta</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-neutral-100">
+                {{RUBRIC_ROWS}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-base font-semibold">Notes</h2>
+          <div class="mt-3 rounded-lg border border-neutral-200 bg-white p-4 text-sm leading-6 text-neutral-700">
+            <p class="font-medium text-neutral-950">Current decision</p>
+            <p class="mt-1">{{STATUS}}</p>
+            <p class="mt-4 font-medium text-neutral-950">Next improvement</p>
+            <p class="mt-1">{{NEXT_WHY}}</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
