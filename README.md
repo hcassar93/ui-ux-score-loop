@@ -159,7 +159,7 @@ Keep it simple:
 ```markdown
 # UI/UX Score Loop Dashboard
 
-Top: flow name, breakpoint dropdown, light/dark mode dropdown, and small Expand all / Collapse all controls.
+Top: flow name, subtle Expand all / Collapse all text controls, breakpoint dropdown, and light/dark mode dropdown.
 
 Main matrix:
 - columns are iterations
