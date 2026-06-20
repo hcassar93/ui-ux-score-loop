@@ -119,7 +119,7 @@ Every score should answer: does this help the user accomplish their real goal wi
 
 ## Dashboard
 
-The dashboard is the loop state. It must show screenshot and rating progress over time, not only a before/after comparison.
+The dashboard is the loop state. It must be dense enough to compare progress after several iterations, not a long report.
 
 Generated loop state belongs in `.ui-ux-score-loop/`, which is ignored by git:
 
@@ -148,25 +148,14 @@ Keep it simple:
 ```markdown
 # UI/UX Score Loop Dashboard
 
-Flow:
-User goal:
-Concerns:
-Target:
-Completion:
-Status:
+Top: flow name, compact status chips, breakpoint filter, light/dark filter.
 
-## Iterations
-| Iteration | Changes | Flow Score | Delta | Decision |
-| ---: | --- | ---: | ---: | --- |
-| 0 | Baseline |  |  |  |
-
-## Views
-| Page | # | View | Breakpoint | Mode | Iteration | Screenshot | Score | Delta | Lowest Principle | User-Serving Note |
-| --- | --- | --- | --- | --- | ---: | --- | ---: | ---: | --- | --- |
-
-## Principle Scores
-| Page | View | Iteration | Principle | Score | Previous | Delta |
-| --- | --- | ---: | --- | ---: | ---: | ---: |
+Main matrix:
+- columns are iterations
+- first rows show changes, decision, and why
+- row groups are views
+- subrows show score, screenshot, notes, and rubric ratings
+- footer rows show page and flow averages
 ```
 
 The skill version includes a minimal Tailwind dashboard template and a helper. The agent must create or refresh the dashboard before scoring, edit `data/state.json`, keep short rationale in `data/ratings.md`, regenerate the dashboard, and give the dashboard path in its final answer:

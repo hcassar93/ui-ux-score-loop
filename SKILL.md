@@ -84,7 +84,7 @@ Use `assets/dashboard.html` as a template asset; do not paste it into chat unles
 
 Do not hand-edit `dashboard.html`. Update `data/state.json` and `data/ratings.md`, then rerun the script.
 
-The dashboard must show iteration history: iteration number, breakpoint, mode, changes, screenshot for each view at that iteration, old/new ratings, deltas, and why the iteration better serves the user. It should allow intuitive switching by breakpoint and by light/dark mode.
+The dashboard must be information dense, not a written report. Keep the top minimal: flow, compact status chips, breakpoint filter, and light/dark filter. The main view must be one comparison matrix with iterations as columns. Put changes, decision, and why in the first matrix rows. Then use views as row groups, with score, screenshot, notes, and rubric-rating rows for each view across iterations. Put page and flow averages at the bottom so progress is easy to scan after multiple iterations.
 
 ## Final Answer Contract
 
