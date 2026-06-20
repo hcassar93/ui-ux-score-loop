@@ -11,6 +11,7 @@ DEFAULT_VIEWPORTS = [
     {"name": "laptop", "width": 1440, "height": 900},
 ]
 DEFAULT_COLOR_MODES = ["light", "dark"]
+DEFAULT_BROWSER = "Prefer integrated browser; use external browser only if needed."
 PRINCIPLES = [
     "Visual hierarchy",
     "Proximity",
@@ -76,6 +77,13 @@ def parse_mode(value):
     return mode
 
 
+def parse_browser(value):
+    browser = value.strip()
+    if not browser:
+        raise argparse.ArgumentTypeError("Browser preference cannot be empty.")
+    return browser
+
+
 def git_root(start):
     try:
         result = subprocess.run(
@@ -105,11 +113,16 @@ def ensure_gitignore(root):
             file.write(f"{pattern}\n")
 
 
-def seed_state(flow, viewports, modes):
+def seed_state(flow, viewports, modes, browser):
     return {
         "flow": flow,
         "user_goal": "",
         "concerns": [],
+        "browser": {
+            "preference": browser,
+            "selected": "",
+            "reason": "",
+        },
         "viewports": viewports,
         "color_modes": modes,
         "target_score": 85,
@@ -168,6 +181,20 @@ def seed_state(flow, viewports, modes):
 
 
 def normalize_state(state):
+    browser = state.get("browser")
+    if not browser:
+        state["browser"] = {
+            "preference": DEFAULT_BROWSER,
+            "selected": "",
+            "reason": "",
+        }
+    elif isinstance(browser, str):
+        state["browser"] = {
+            "preference": browser,
+            "selected": "",
+            "reason": "",
+        }
+
     modes = state.get("color_modes")
     if not modes:
         modes = sorted(
@@ -185,6 +212,13 @@ def normalize_state(state):
             item.setdefault("mode", state["color_modes"][0])
 
     return state
+
+
+def browser_label(state):
+    browser = state.get("browser") or {}
+    if isinstance(browser, str):
+        return browser
+    return browser.get("selected") or browser.get("preference") or DEFAULT_BROWSER
 
 
 def numeric(value):
@@ -361,6 +395,7 @@ def render(template, state):
             ("Delta", delta_text(latest_delta) or "--"),
             ("Target", state.get("target_score")),
             ("Status", state.get("status")),
+            ("Browser", browser_label(state)),
             ("Views", len({view_key(item) for item in views})),
             ("Iterations", len(iteration_numbers)),
         )
@@ -630,6 +665,12 @@ def main():
         type=parse_mode,
         help="Color mode to test, such as light, dark, or default. Can be repeated.",
     )
+    parser.add_argument(
+        "--browser",
+        default=DEFAULT_BROWSER,
+        type=parse_browser,
+        help="Browser preference or selected browser/tool for this loop.",
+    )
     args = parser.parse_args()
 
     skill_root = Path(__file__).resolve().parents[1]
@@ -657,7 +698,7 @@ def main():
         state = normalize_state(json.loads(state_path.read_text(encoding="utf-8")))
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     else:
-        state = seed_state(args.flow, viewports, modes)
+        state = seed_state(args.flow, viewports, modes, args.browser)
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
     ratings = data_dir / "ratings.md"

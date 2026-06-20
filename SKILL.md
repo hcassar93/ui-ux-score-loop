@@ -1,6 +1,6 @@
 ---
 name: ui-ux-score-loop
-description: Browser-based UI/UX improvement loop for one specified product flow. Use when the user asks to inspect, score, improve, or iteratively test a flow such as signup, login, password reset, checkout, create/edit/delete/share, onboarding, or another key UI path using screenshots, responsive breakpoints, light/dark modes, 0-100 UX rubric scores, and a dashboard state file.
+description: Browser-based UI/UX improvement loop for one specified product flow. Use when the user asks to inspect, score, improve, or iteratively test a flow such as signup, login, password reset, checkout, create/edit/delete/share, onboarding, or another key UI path using a selected real browser, screenshots, responsive breakpoints, light/dark modes, 0-100 UX rubric scores, and a dashboard state file.
 ---
 
 # UI/UX Score Loop
@@ -12,24 +12,25 @@ Improve exactly one user flow by using browser evidence and 0-100 scores as the 
 When the user invokes this skill, run this loop unless they ask only for advice:
 
 ```text
-Run UI/UX Score Loop on [FLOW] at [URL] with one completion criterion: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations. Use a real browser. Unless viewports are supplied, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create or refresh `.ui-ux-score-loop/dashboard.html` before scoring, then complete the flow once without editing as iteration 0, break it into pages and views, and screenshot every view at every breakpoint and mode. Score each view/breakpoint/mode 0-100 against the UI/UX principles, update the dashboard after each iteration, improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, record deltas, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without clearly giving the user the dashboard path.
+Run UI/UX Score Loop on [FLOW] at [URL] with one completion criterion: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations. Use a real browser. If a browser/tool is specified, use it unless it cannot faithfully run the flow; otherwise prefer an integrated browser such as the Codex in-app/browser panel or the IDE integrated browser, then fall back to Playwright MCP or another external browser when needed. Unless viewports are supplied, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create or refresh `.ui-ux-score-loop/dashboard.html` before scoring, then complete the flow once without editing as iteration 0, break it into pages and views, and screenshot every view at every breakpoint and mode. Score each view/breakpoint/mode 0-100 against the UI/UX principles, update the dashboard after each iteration, improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, record deltas, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without clearly giving the user the dashboard path and browser used.
 ```
 
 If the flow, URL, or completion criterion is missing, ask only for the missing input.
 
 ## Workflow
 
-1. Confirm the flow, URL, concerns, off-limits areas, one completion criterion, any custom viewports, and whether light/dark mode is supported.
+1. Confirm the flow, URL, concerns, off-limits areas, one completion criterion, any custom viewports, any browser/tool preference, and whether light/dark mode is supported.
 2. If custom viewports are not supplied, use phone 390x844, tablet 768x1024, and laptop 1440x900.
 3. If the app supports light/dark mode, test both light and dark. If not, use one `default` mode.
-4. Run the dashboard helper immediately so `.ui-ux-score-loop/dashboard.html`, `data/`, `screenshots/`, and the gitignore entry exist before evidence is captured.
-5. Use a real browser to complete the flow once without editing as iteration 0 at each breakpoint/mode combination.
-6. Break the flow into pages and views, including modals, popovers, drawers, empty, loading, error, and success states.
-7. Screenshot every view at each breakpoint/mode.
-8. Score each view/breakpoint/mode from 0-100 against the principles below.
-9. Update and regenerate the dashboard with mode, breakpoint, view, page, flow, and principle averages.
-10. Improve the lowest user-impactful, safely changeable principle/view/breakpoint/mode score with manageable related changes that clearly target the score.
-11. Rerun the same flow, capture new screenshots for affected views, breakpoints, and modes, rescore, record deltas, and keep the iteration only if it improves the target without creating a worse problem elsewhere.
+4. Select the browser/tool. Prefer the user's requested browser if it can exercise the flow. If no preference is supplied, prefer an integrated browser. Use an external browser only when the integrated browser is unavailable, cannot set the needed viewport/mode, cannot capture screenshots, lacks required session/auth state, or cannot reach the target.
+5. Run the dashboard helper immediately so `.ui-ux-score-loop/dashboard.html`, `data/`, `screenshots/`, and the gitignore entry exist before evidence is captured.
+6. Use the selected browser to complete the flow once without editing as iteration 0 at each breakpoint/mode combination.
+7. Break the flow into pages and views, including modals, popovers, drawers, empty, loading, error, and success states.
+8. Screenshot every view at each breakpoint/mode.
+9. Score each view/breakpoint/mode from 0-100 against the principles below.
+10. Update and regenerate the dashboard with browser, mode, breakpoint, view, page, flow, and principle averages.
+11. Improve the lowest user-impactful, safely changeable principle/view/breakpoint/mode score with manageable related changes that clearly target the score.
+12. Rerun the same flow, capture new screenshots for affected views, breakpoints, and modes, rescore, record deltas, and keep the iteration only if it improves the target without creating a worse problem elsewhere.
 
 Stop when the completion criterion is met, two passes stall, or the next best change needs approval.
 
@@ -50,6 +51,18 @@ Always explain scores through serving the user: does this help the user accompli
 ## Guardrails
 
 Do not overhaul the UI. Preserve brand, voice, information architecture, and working behavior. Do not add decorative AI slop, generic gradients, random cards, unnecessary animation, or novelty that does not help the flow. Ask before changing navigation, pricing, auth, destructive actions, business logic, or product strategy.
+
+## Browser Selection
+
+Accept optional browser guidance such as:
+
+- `Browser: Codex in-app browser`
+- `Browser: VS Code integrated browser`
+- `Browser: Playwright MCP`
+- `Browser: Chrome with my logged-in session`
+- `Browser: prefer integrated`
+
+Choose the browser that best preserves the real user experience and required state. Prefer integrated browser tooling for local app flows because it keeps screenshots and interactions close to the workspace. Use Playwright MCP or another external browser when it is better for viewport automation, repeatable screenshots, auth/session access, cross-browser behavior, or when integrated tooling is unavailable. Record the preference, selected browser, and reason in `.ui-ux-score-loop/data/state.json`.
 
 ## Dashboard
 
@@ -77,7 +90,7 @@ python3 scripts/create_dashboard.py --flow "Signup"
 To seed a custom viewport set, pass repeated viewport flags:
 
 ```bash
-python3 scripts/create_dashboard.py --flow "Signup" --viewport phone:390x844 --viewport desktop:1728x1117 --mode light --mode dark
+python3 scripts/create_dashboard.py --flow "Signup" --viewport phone:390x844 --viewport desktop:1728x1117 --mode light --mode dark --browser "Codex in-app browser"
 ```
 
 Use `assets/dashboard.html` as a template asset; do not paste it into chat unless the user asks.
@@ -93,6 +106,7 @@ Always deliver the dashboard explicitly. The final answer must include:
 - The path to `.ui-ux-score-loop/dashboard.html`.
 - The path to `.ui-ux-score-loop/data/state.json`.
 - The screenshot root path.
+- The browser/tool used and why.
 - The completion status and current flow score or best available score.
 - The next target if the loop is not complete.
 

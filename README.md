@@ -35,6 +35,7 @@ Then call the skill with one flow, any extra concerns, and one completion criter
 Use $ui-ux-score-loop on the signup flow at http://localhost:3000.
 Concerns: mobile clarity, form errors, trust, and reducing hesitation before submit.
 Completion: reach a flow score of 85/100.
+Browser: prefer integrated.
 ```
 
 If viewports are not specified, the loop tests phone `390x844`, tablet `768x1024`, and laptop `1440x900`. You can also specify custom viewports:
@@ -45,12 +46,14 @@ Viewports: phone 390x844, desktop 1728x1117.
 
 If the app supports light/dark mode, test both. Otherwise use the app's default mode.
 
+Browser is optional. If omitted, prefer an integrated browser such as Codex in-app/browser panel or the IDE integrated browser. Use Playwright MCP, Chrome, or another external browser when that better preserves auth/session state, viewport control, screenshots, or access to the target.
+
 ## Prompt-Only Version
 
 Copy this into any agent:
 
 ```text
-Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create a dashboard before scoring. Break the flow into pages and views, screenshot and score every view/breakpoint/mode 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep the dashboard updated with breakpoint/mode-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without giving the dashboard path. Do not overhaul the UI; serve the user.
+Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. If a browser/tool is specified, use it unless it cannot faithfully run the flow; otherwise prefer an integrated browser, falling back to Playwright MCP or another external browser when needed. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create a dashboard before scoring. Break the flow into pages and views, screenshot and score every view/breakpoint/mode 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep the dashboard updated with breakpoint/mode-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without giving the dashboard path and browser used. Do not overhaul the UI; serve the user.
 ```
 
 Use it like this:
@@ -61,8 +64,9 @@ Run UI/UX Score Loop on [FLOW] at [URL].
 Completion: choose one: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations.
 Viewports: optional. Defaults to phone 390x844, tablet 768x1024, and laptop 1440x900.
 Modes: if light/dark is supported, test light and dark; otherwise use default.
+Browser: optional. Prefer integrated browser by default; examples: Codex in-app browser, VS Code integrated browser, Playwright MCP, Chrome with logged-in session.
 
-Use a real browser. Complete the flow once without editing at each breakpoint/mode combination, then break it into pages and views, including modals, popovers, drawers, empty states, loading states, error states, and success states. This first pass is iteration 0. Screenshot every view at each breakpoint/mode.
+Use the selected real browser. Complete the flow once without editing at each breakpoint/mode combination, then break it into pages and views, including modals, popovers, drawers, empty states, loading states, error states, and success states. This first pass is iteration 0. Screenshot every view at each breakpoint/mode.
 
 Create a dashboard before scoring and explicitly deliver its path in the final answer. Score every view/breakpoint/mode from 0-100 against these principles: visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance and harmony, consistency, visual cues, depth and texture, color theory, typography, and interaction cost. View score is the average of its principle scores. Page score is the average of its views, breakpoints, and modes. Flow score is the average of its pages.
 
@@ -70,7 +74,7 @@ The scores are the loop signal. Improve the lowest-scoring principle/view pair t
 
 Rerun the same flow after each iteration, capture a new screenshot for every affected view, rescore, update the dashboard, and record the delta. Keep the iteration only if it improves the target score without creating a worse problem elsewhere. Repeat until the completion criterion is met, progress stalls, or the next change needs approval.
 
-Final answer must include the dashboard path, state file path, screenshot root, completion status, current score, and next target if unfinished.
+Final answer must include the dashboard path, state file path, screenshot root, browser used, completion status, current score, and next target if unfinished.
 
 Serve the user. Reduce confusion, hesitation, rework, anxiety, waiting, and avoidable choice. Preserve the product's brand, voice, information architecture, and working behavior. Do not add decorative AI slop, generic gradients, random cards, unnecessary animation, or novelty that does not help the flow. Ask before changing navigation, pricing, auth, destructive actions, business logic, or product strategy.
 ```
@@ -83,6 +87,7 @@ Concerns: mobile clarity, form errors, trust, and reducing hesitation before sub
 Completion: reach a flow score of 85/100.
 Viewports: phone 390x844, tablet 768x1024, laptop 1440x900.
 Modes: light and dark.
+Browser: Codex in-app browser.
 ```
 
 ## Rubric
@@ -170,7 +175,7 @@ The helper adds `.ui-ux-score-loop/` to the target repository's `.gitignore` bef
 Custom dashboard viewports:
 
 ```bash
-python3 scripts/create_dashboard.py --flow "Signup" --viewport phone:390x844 --viewport desktop:1728x1117 --mode light --mode dark
+python3 scripts/create_dashboard.py --flow "Signup" --viewport phone:390x844 --viewport desktop:1728x1117 --mode light --mode dark --browser "Codex in-app browser"
 ```
 
 ## Maintainer Submission
@@ -184,7 +189,7 @@ The UI/UX score loop
 Prompt:
 
 ```text
-Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create a dashboard before scoring. Break the flow into pages and views, screenshot and score every view/breakpoint/mode 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep the dashboard updated with breakpoint/mode-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without giving the dashboard path. Do not overhaul the UI; serve the user.
+Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. If a browser/tool is specified, use it unless it cannot faithfully run the flow; otherwise prefer an integrated browser, falling back to Playwright MCP or another external browser when needed. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. If the app supports light/dark mode, test both; otherwise use the default mode. Create a dashboard before scoring. Break the flow into pages and views, screenshot and score every view/breakpoint/mode 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep the dashboard updated with breakpoint/mode-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not finish without giving the dashboard path and browser used. Do not overhaul the UI; serve the user.
 ```
 
 Source link after publishing:
