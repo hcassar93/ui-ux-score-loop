@@ -13,6 +13,7 @@ DEFAULT_VIEWPORTS = [
 ]
 DEFAULT_COLOR_MODES = ["light", "dark"]
 DEFAULT_BROWSER = "Prefer integrated browser; use external browser only if needed."
+DEFAULT_IMPROVEMENT_INTENSITY = "grouped"
 PRINCIPLES = [
     "Visual hierarchy",
     "Proximity",
@@ -85,6 +86,16 @@ def parse_browser(value):
     return browser
 
 
+def parse_improvement_intensity(value):
+    intensity = value.strip().lower()
+    allowed = {"focused", "grouped", "broad"}
+    if intensity not in allowed:
+        raise argparse.ArgumentTypeError(
+            "Improvement intensity must be one of: focused, grouped, broad."
+        )
+    return intensity
+
+
 def git_root(start):
     try:
         result = subprocess.run(
@@ -114,11 +125,12 @@ def ensure_gitignore(root):
             file.write(f"{pattern}\n")
 
 
-def seed_state(flow, viewports, modes, browser):
+def seed_state(flow, viewports, modes, browser, improvement_intensity):
     return {
         "flow": flow,
         "user_goal": "",
         "concerns": [],
+        "improvement_intensity": improvement_intensity,
         "browser": {
             "preference": browser,
             "selected": "",
@@ -182,6 +194,8 @@ def seed_state(flow, viewports, modes, browser):
 
 
 def normalize_state(state):
+    state.setdefault("improvement_intensity", DEFAULT_IMPROVEMENT_INTENSITY)
+
     browser = state.get("browser")
     if not browser:
         state["browser"] = {
@@ -728,6 +742,13 @@ def main():
         type=parse_browser,
         help="Browser preference or selected browser/tool for this loop.",
     )
+    parser.add_argument(
+        "--improvement-intensity",
+        default=None,
+        type=parse_improvement_intensity,
+        choices=("focused", "grouped", "broad"),
+        help="How aggressively to improve each view per iteration.",
+    )
     args = parser.parse_args()
 
     skill_root = Path(__file__).resolve().parents[1]
@@ -753,9 +774,17 @@ def main():
     state_path = data_dir / "state.json"
     if state_path.exists():
         state = normalize_state(json.loads(state_path.read_text(encoding="utf-8")))
+        if args.improvement_intensity:
+            state["improvement_intensity"] = args.improvement_intensity
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     else:
-        state = seed_state(args.flow, viewports, modes, args.browser)
+        state = seed_state(
+            args.flow,
+            viewports,
+            modes,
+            args.browser,
+            args.improvement_intensity or DEFAULT_IMPROVEMENT_INTENSITY,
+        )
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
     ratings = data_dir / "ratings.md"
