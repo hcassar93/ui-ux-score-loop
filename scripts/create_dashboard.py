@@ -10,6 +10,7 @@ DEFAULT_VIEWPORTS = [
     {"name": "tablet", "width": 768, "height": 1024},
     {"name": "laptop", "width": 1440, "height": 900},
 ]
+DEFAULT_COLOR_MODES = ["light", "dark"]
 
 
 def fmt(value):
@@ -47,6 +48,13 @@ def viewport_label(viewport):
     return f"{viewport['name']} ({viewport['width']}x{viewport['height']})"
 
 
+def parse_mode(value):
+    mode = value.strip().lower()
+    if not mode:
+        raise argparse.ArgumentTypeError("Mode cannot be empty.")
+    return mode
+
+
 def git_root(start):
     try:
         result = subprocess.run(
@@ -76,12 +84,13 @@ def ensure_gitignore(root):
             file.write(f"{pattern}\n")
 
 
-def seed_state(flow, viewports):
+def seed_state(flow, viewports, modes):
     return {
         "flow": flow,
         "user_goal": "",
         "concerns": [],
         "viewports": viewports,
+        "color_modes": modes,
         "target_score": 85,
         "completion": "Reach a flow score of 85/100.",
         "minimum_critical_view_score": 75,
@@ -102,14 +111,16 @@ def seed_state(flow, viewports):
                 "view": "View",
                 "view_number": "001",
                 "viewport": viewport["name"],
+                "mode": mode,
                 "iteration": 0,
-                "screenshot": f"screenshots/iteration-000/{viewport['name']}/001-view.png",
+                "screenshot": f"screenshots/iteration-000/{viewport['name']}/{mode}/001-view.png",
                 "score": None,
                 "delta": None,
                 "lowest_principle": "Clarity",
                 "note": "What this view makes easier or harder for the user.",
             }
             for viewport in viewports
+            for mode in modes
         ],
         "rubric_scores": [
             {
@@ -117,6 +128,7 @@ def seed_state(flow, viewports):
                 "view": "View",
                 "view_number": "001",
                 "viewport": viewports[0]["name"],
+                "mode": modes[0],
                 "iteration": 0,
                 "principle": "Clarity",
                 "previous": None,
@@ -132,6 +144,26 @@ def seed_state(flow, viewports):
             "why": "",
         },
     }
+
+
+def normalize_state(state):
+    modes = state.get("color_modes")
+    if not modes:
+        modes = sorted(
+            {
+                item.get("mode")
+                for collection in ("views", "rubric_scores")
+                for item in state.get(collection, [])
+                if item.get("mode")
+            }
+        )
+        state["color_modes"] = modes or ["default"]
+
+    for collection in ("views", "rubric_scores"):
+        for item in state.get(collection, []):
+            item.setdefault("mode", state["color_modes"][0])
+
+    return state
 
 
 def latest(values, key):
@@ -174,6 +206,7 @@ def render(template, state):
                 td(item.get("view_number")),
                 td(item.get("view")),
                 td(item.get("viewport")),
+                td(item.get("mode")),
                 td(item.get("iteration"), "px-4 py-3 tabular-nums"),
                 td(item.get("screenshot"), "px-4 py-3 text-neutral-600"),
                 td(item.get("score"), "px-4 py-3 text-right font-semibold tabular-nums"),
@@ -181,7 +214,10 @@ def render(template, state):
                 td(item.get("lowest_principle")),
                 td(item.get("note"), "px-4 py-3 text-neutral-600"),
             ],
-            f' data-viewport-row="{esc(item.get("viewport"))}"',
+            (
+                f' data-viewport-row="{esc(item.get("viewport"))}"'
+                f' data-mode-row="{esc(item.get("mode"))}"'
+            ),
         )
         for item in views
     )
@@ -190,14 +226,17 @@ def render(template, state):
         row(
             [
                 td(
-                    f"{item.get('page', '')} / {item.get('view', '')} / {item.get('viewport', '')}"
+                    f"{item.get('page', '')} / {item.get('view', '')} / {item.get('viewport', '')} / {item.get('mode', '')}"
                 ),
                 td(item.get("principle")),
                 td(item.get("previous"), "px-4 py-3 text-right tabular-nums"),
                 td(item.get("score"), "px-4 py-3 text-right tabular-nums"),
                 td(item.get("delta"), "px-4 py-3 text-right tabular-nums"),
             ],
-            f' data-viewport-row="{esc(item.get("viewport"))}"',
+            (
+                f' data-viewport-row="{esc(item.get("viewport"))}"'
+                f' data-mode-row="{esc(item.get("mode"))}"'
+            ),
         )
         for item in rubric_scores
     )
@@ -206,6 +245,8 @@ def render(template, state):
     concern_text = ", ".join(concerns) if isinstance(concerns, list) else str(concerns)
     viewports = state.get("viewports") or DEFAULT_VIEWPORTS
     viewport_text = ", ".join(viewport_label(viewport) for viewport in viewports)
+    modes = state.get("color_modes") or DEFAULT_COLOR_MODES
+    mode_text = ", ".join(modes)
     viewport_buttons = "\n".join(
         [
             '<button class="rounded-full border border-neutral-950 bg-neutral-950 px-3 py-1 text-sm text-white" data-viewport-filter="all">All</button>'
@@ -216,6 +257,18 @@ def render(template, state):
                 f'data-viewport-filter="{esc(viewport["name"])}">{esc(viewport_label(viewport))}</button>'
             )
             for viewport in viewports
+        ]
+    )
+    mode_buttons = "\n".join(
+        [
+            '<button class="rounded-full border border-neutral-950 bg-neutral-950 px-3 py-1 text-sm text-white" data-mode-filter="all">All</button>'
+        ]
+        + [
+            (
+                f'<button class="rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm text-neutral-700" '
+                f'data-mode-filter="{esc(mode)}">{esc(mode)}</button>'
+            )
+            for mode in modes
         ]
     )
     next_improvement = state.get("next_improvement", {})
@@ -232,7 +285,9 @@ def render(template, state):
         "{{USER_GOAL}}": esc(state.get("user_goal")),
         "{{CONCERNS}}": esc(concern_text),
         "{{VIEWPORTS}}": esc(viewport_text),
+        "{{COLOR_MODES}}": esc(mode_text),
         "{{VIEWPORT_BUTTONS}}": viewport_buttons,
+        "{{MODE_BUTTONS}}": mode_buttons,
         "{{STATUS}}": esc(state.get("status")),
         "{{ITERATION_ROWS}}": iteration_rows,
         "{{VIEW_ROWS}}": view_rows,
@@ -258,6 +313,12 @@ def main():
         type=parse_viewport,
         help="Custom viewport as name:WIDTHxHEIGHT. Can be repeated.",
     )
+    parser.add_argument(
+        "--mode",
+        action="append",
+        type=parse_mode,
+        help="Color mode to test, such as light, dark, or default. Can be repeated.",
+    )
     args = parser.parse_args()
 
     skill_root = Path(__file__).resolve().parents[1]
@@ -272,17 +333,20 @@ def main():
     data_dir.mkdir(exist_ok=True)
     screenshots_dir.mkdir(exist_ok=True)
     viewports = args.viewport or DEFAULT_VIEWPORTS
+    modes = args.mode or DEFAULT_COLOR_MODES
     for viewport in viewports:
-        (screenshots_dir / "iteration-000" / viewport["name"]).mkdir(
-            parents=True,
-            exist_ok=True,
-        )
+        for mode in modes:
+            (screenshots_dir / "iteration-000" / viewport["name"] / mode).mkdir(
+                parents=True,
+                exist_ok=True,
+            )
 
     state_path = data_dir / "state.json"
     if state_path.exists():
-        state = json.loads(state_path.read_text(encoding="utf-8"))
+        state = normalize_state(json.loads(state_path.read_text(encoding="utf-8")))
+        state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     else:
-        state = seed_state(args.flow, viewports)
+        state = seed_state(args.flow, viewports, modes)
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
     ratings = data_dir / "ratings.md"
