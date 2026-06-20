@@ -37,12 +37,18 @@ Concerns: mobile clarity, form errors, trust, and reducing hesitation before sub
 Completion: reach a flow score of 85/100.
 ```
 
+If viewports are not specified, the loop tests phone `390x844`, tablet `768x1024`, and laptop `1440x900`. You can also specify custom viewports:
+
+```text
+Viewports: phone 390x844, desktop 1728x1117.
+```
+
 ## Prompt-Only Version
 
 Copy this into any agent:
 
 ```text
-Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Break the flow into pages and views, screenshot and score every view 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep a dashboard with iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not overhaul the UI; serve the user.
+Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. Break the flow into pages and views, screenshot and score every view/viewport 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep a dashboard with viewport-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not overhaul the UI; serve the user.
 ```
 
 Use it like this:
@@ -51,10 +57,11 @@ Use it like this:
 Run UI/UX Score Loop on [FLOW] at [URL].
 
 Completion: choose one: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations.
+Viewports: optional. Defaults to phone 390x844, tablet 768x1024, and laptop 1440x900.
 
-Use a real browser. Complete the flow once without editing, then break it into pages and views, including modals, popovers, drawers, empty states, loading states, error states, and success states. This first pass is iteration 0. Screenshot every view.
+Use a real browser. Complete the flow once without editing at each viewport, then break it into pages and views, including modals, popovers, drawers, empty states, loading states, error states, and success states. This first pass is iteration 0. Screenshot every view at each viewport.
 
-Create a dashboard. Score every view from 0-100 against these principles: visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance and harmony, consistency, visual cues, depth and texture, color theory, typography, and interaction cost. View score is the average of its principle scores. Page score is the average of its views. Flow score is the average of its pages.
+Create a dashboard. Score every view/viewport from 0-100 against these principles: visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance and harmony, consistency, visual cues, depth and texture, color theory, typography, and interaction cost. View score is the average of its principle scores. Page score is the average of its views and viewports. Flow score is the average of its pages.
 
 The scores are the loop signal. Improve the lowest-scoring principle/view pair that is user-impactful, safe to change, and likely to improve the flow. Each iteration may include multiple related changes, but keep them manageable, clearly connected to the target score, and easy to review. Do not overhaul the UI.
 
@@ -69,6 +76,7 @@ Example:
 Run UI/UX Score Loop on signup at http://localhost:3000.
 Concerns: mobile clarity, form errors, trust, and reducing hesitation before submit.
 Completion: reach a flow score of 85/100.
+Viewports: phone 390x844, tablet 768x1024, laptop 1440x900.
 ```
 
 ## Rubric
@@ -117,6 +125,9 @@ Generated loop state belongs in `.ui-ux-score-loop/`, which is ignored by git:
     ratings.md
   screenshots/
     iteration-000/
+      phone/
+      tablet/
+      laptop/
     iteration-001/
 ```
 
@@ -138,8 +149,8 @@ Status:
 | 0 | Baseline |  |  |  |
 
 ## Views
-| Page | View | Iteration | Screenshot | Score | Delta | Lowest Principle | User-Serving Note |
-| --- | --- | ---: | --- | ---: | ---: | --- | --- |
+| Page | View | Viewport | Iteration | Screenshot | Score | Delta | Lowest Principle | User-Serving Note |
+| --- | --- | --- | ---: | --- | ---: | ---: | --- | --- |
 
 ## Principle Scores
 | Page | View | Iteration | Principle | Score | Previous | Delta |
@@ -150,6 +161,12 @@ The skill version includes a minimal Tailwind dashboard template and a helper. T
 
 ```bash
 python3 scripts/create_dashboard.py --flow "Signup"
+```
+
+Custom dashboard viewports:
+
+```bash
+python3 scripts/create_dashboard.py --flow "Signup" --viewport phone:390x844 --viewport desktop:1728x1117
 ```
 
 ## Maintainer Submission
@@ -163,7 +180,7 @@ The UI/UX score loop
 Prompt:
 
 ```text
-Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Break the flow into pages and views, screenshot and score every view 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep a dashboard with iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not overhaul the UI; serve the user.
+Evaluate one specified key flow in a real browser. Require one completion criterion: target flow score, percent improvement, or max iterations. Unless viewports are specified, test phone 390x844, tablet 768x1024, and laptop 1440x900. Break the flow into pages and views, screenshot and score every view/viewport 0-100 as iteration 0 against visual hierarchy, proximity, clarity, alignment, contrast, simplicity, whitespace, layout, balance, consistency, cues, depth, color, typography, and interaction cost. Keep a dashboard with viewport-switchable iteration screenshots, view/page/flow averages, score deltas, notes, and the next target. Improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, and repeat until the criterion is met, progress stalls, or approval is needed. Do not overhaul the UI; serve the user.
 ```
 
 Source link after publishing:

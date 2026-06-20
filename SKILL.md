@@ -12,21 +12,22 @@ Improve exactly one user flow by using browser evidence and 0-100 scores as the 
 When the user invokes this skill, run this loop unless they ask only for advice:
 
 ```text
-Run UI/UX Score Loop on [FLOW] at [URL] with one completion criterion: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations. Use a real browser. Complete the flow once without editing as iteration 0, break it into pages and views, and screenshot every view. Score each view 0-100 against the UI/UX principles, update an iteration dashboard, improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, record deltas, and repeat until the criterion is met, progress stalls, or approval is needed.
+Run UI/UX Score Loop on [FLOW] at [URL] with one completion criterion: reach [TARGET]/100 flow score, improve by [PERCENT]%, or run [N] iterations. Use a real browser. Unless viewports are supplied, test phone 390x844, tablet 768x1024, and laptop 1440x900. Complete the flow once without editing as iteration 0, break it into pages and views, and screenshot every view at every viewport. Score each view/viewport 0-100 against the UI/UX principles, update an iteration dashboard, improve the lowest user-impactful safe score with manageable brand-consistent changes, rerun, rescore, record deltas, and repeat until the criterion is met, progress stalls, or approval is needed.
 ```
 
 If the flow, URL, or completion criterion is missing, ask only for the missing input.
 
 ## Workflow
 
-1. Confirm the flow, URL, concerns, off-limits areas, and one completion criterion: target flow score, percent improvement, or max iterations.
-2. Use a real browser to complete the flow once without editing as iteration 0.
-3. Break the flow into pages and views, including modals, popovers, drawers, empty, loading, error, and success states.
-4. Screenshot every view.
-5. Score each view from 0-100 against the principles below.
-6. Update the dashboard with view, page, flow, and principle averages.
-7. Improve the lowest user-impactful, safely changeable principle/view score with manageable related changes that clearly target the score.
-8. Rerun the same flow, capture new screenshots for affected views, rescore, record deltas, and keep the iteration only if it improves the target without creating a worse problem elsewhere.
+1. Confirm the flow, URL, concerns, off-limits areas, one completion criterion, and any custom viewports.
+2. If custom viewports are not supplied, use phone 390x844, tablet 768x1024, and laptop 1440x900.
+3. Use a real browser to complete the flow once without editing as iteration 0 at each viewport.
+4. Break the flow into pages and views, including modals, popovers, drawers, empty, loading, error, and success states.
+5. Screenshot every view at each viewport.
+6. Score each view/viewport from 0-100 against the principles below.
+7. Update the dashboard with viewport, view, page, flow, and principle averages.
+8. Improve the lowest user-impactful, safely changeable principle/view/viewport score with manageable related changes that clearly target the score.
+9. Rerun the same flow, capture new screenshots for affected views and viewports, rescore, record deltas, and keep the iteration only if it improves the target without creating a worse problem elsewhere.
 
 Stop when the completion criterion is met, two passes stall, or the next best change needs approval.
 
@@ -57,8 +58,8 @@ Use this structure:
 - `.ui-ux-score-loop/dashboard.html`: generated Tailwind dashboard.
 - `.ui-ux-score-loop/data/state.json`: structured source of truth for iterations, view scores, rubric scores, and next target.
 - `.ui-ux-score-loop/data/ratings.md`: short human notes and rationale that should not clutter tables.
-- `.ui-ux-score-loop/screenshots/iteration-000/`: baseline screenshots.
-- `.ui-ux-score-loop/screenshots/iteration-001/`: first changed iteration screenshots.
+- `.ui-ux-score-loop/screenshots/iteration-000/{viewport}/`: baseline screenshots.
+- `.ui-ux-score-loop/screenshots/iteration-001/{viewport}/`: first changed iteration screenshots.
 - Continue with zero-padded iteration folders.
 
 Use `scripts/create_dashboard.py` to create or refresh the dashboard workspace:
@@ -67,8 +68,14 @@ Use `scripts/create_dashboard.py` to create or refresh the dashboard workspace:
 python3 scripts/create_dashboard.py --flow "Signup"
 ```
 
+To seed a custom viewport set, pass repeated viewport flags:
+
+```bash
+python3 scripts/create_dashboard.py --flow "Signup" --viewport phone:390x844 --viewport desktop:1728x1117
+```
+
 Use `assets/dashboard.html` as a template asset; do not paste it into chat unless the user asks.
 
 Do not hand-edit `dashboard.html`. Update `data/state.json` and `data/ratings.md`, then rerun the script.
 
-The dashboard must show iteration history: iteration number, changes, screenshot for each view at that iteration, old/new ratings, deltas, and why the iteration better serves the user.
+The dashboard must show iteration history: iteration number, viewport, changes, screenshot for each view at that iteration, old/new ratings, deltas, and why the iteration better serves the user. It should allow intuitive switching between viewport rows.

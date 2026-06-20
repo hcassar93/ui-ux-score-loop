@@ -21,9 +21,10 @@
           the same flow, and keep only changes that move the numbers without
           harming the user.
         </p>
-        <dl class="mt-4 grid gap-2 text-sm text-neutral-600 sm:grid-cols-3">
+        <dl class="mt-4 grid gap-2 text-sm text-neutral-600 sm:grid-cols-2 lg:grid-cols-4">
           <div><dt class="font-medium text-neutral-950">Goal</dt><dd>{{USER_GOAL}}</dd></div>
           <div><dt class="font-medium text-neutral-950">Concerns</dt><dd>{{CONCERNS}}</dd></div>
+          <div><dt class="font-medium text-neutral-950">Viewports</dt><dd>{{VIEWPORTS}}</dd></div>
           <div><dt class="font-medium text-neutral-950">Completion</dt><dd>{{COMPLETION}}</dd></div>
           <div><dt class="font-medium text-neutral-950">Status</dt><dd>{{STATUS}}</dd></div>
         </dl>
@@ -49,6 +50,13 @@
           <p class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Next target</p>
           <p class="mt-3 text-4xl font-semibold tabular-nums">{{NEXT_TARGET}}</p>
           <p class="mt-1 text-sm text-neutral-500">Expected: {{EXPECTED_DELTA}}</p>
+        </div>
+      </section>
+
+      <section class="mt-6">
+        <h2 class="text-base font-semibold">Viewport</h2>
+        <div class="mt-3 flex flex-wrap gap-2" data-viewport-controls>
+          {{VIEWPORT_BUTTONS}}
         </div>
       </section>
 
@@ -83,8 +91,8 @@
       <section class="mt-8">
         <h2 class="text-base font-semibold">View Progress</h2>
         <p class="mt-1 text-sm text-neutral-500">
-          Add one row per view per iteration. Screenshots should live in
-          <code class="rounded bg-neutral-100 px-1 py-0.5">.ui-ux-score-loop/screenshots/iteration-###/</code>.
+          Add one row per view, viewport, and iteration. Screenshots should live in
+          <code class="rounded bg-neutral-100 px-1 py-0.5">.ui-ux-score-loop/screenshots/iteration-###/{viewport}/</code>.
         </p>
         <div class="mt-3 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
           <table class="min-w-full divide-y divide-neutral-200 text-sm">
@@ -92,6 +100,7 @@
               <tr>
                 <th class="px-4 py-3">Page</th>
                 <th class="px-4 py-3">View</th>
+                <th class="px-4 py-3">Viewport</th>
                 <th class="px-4 py-3">Iteration</th>
                 <th class="px-4 py-3">Screenshot</th>
                 <th class="px-4 py-3 text-right">Score</th>
@@ -143,5 +152,29 @@
         </div>
       </section>
     </main>
+    <script>
+      const buttons = document.querySelectorAll("[data-viewport-filter]");
+      const rows = document.querySelectorAll("[data-viewport-row]");
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const selected = button.dataset.viewportFilter;
+
+          buttons.forEach((candidate) => {
+            const active = candidate === button;
+            candidate.classList.toggle("bg-neutral-950", active);
+            candidate.classList.toggle("text-white", active);
+            candidate.classList.toggle("border-neutral-950", active);
+            candidate.classList.toggle("bg-white", !active);
+            candidate.classList.toggle("text-neutral-700", !active);
+            candidate.classList.toggle("border-neutral-200", !active);
+          });
+
+          rows.forEach((row) => {
+            row.hidden = selected !== "all" && row.dataset.viewportRow !== selected;
+          });
+        });
+      });
+    </script>
   </body>
 </html>
